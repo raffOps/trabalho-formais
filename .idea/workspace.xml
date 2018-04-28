@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="61ad9454-4ed8-46ae-ae5b-08394800e920" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/gramatica_exemplo1.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gramatica_exemplo2.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/leitor.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/producoes.txt" afterDir="false" />
-    </list>
+    <list default="true" id="61ad9454-4ed8-46ae-ae5b-08394800e920" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,8 +14,8 @@
       <file leaf-file-name="leitor.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/leitor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="50" column="23" lean-forward="true" selection-start-line="50" selection-start-column="23" selection-end-line="50" selection-end-column="23" />
+            <state relative-caret-position="371">
+              <caret line="45" column="31" lean-forward="true" selection-start-line="45" selection-start-column="31" selection-end-line="45" selection-end-column="31" />
             </state>
           </provider>
         </entry>
@@ -142,7 +137,7 @@
       <window_info anchor="bottom" id="Find" order="1" weight="0.32988626" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.327818" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.327818" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -185,8 +180,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/leitor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="50" column="23" lean-forward="true" selection-start-line="50" selection-start-column="23" selection-end-line="50" selection-end-column="23" />
+        <state relative-caret-position="371">
+          <caret line="45" column="31" lean-forward="true" selection-start-line="45" selection-start-column="31" selection-end-line="45" selection-end-column="31" />
         </state>
       </provider>
     </entry>
