@@ -1,4 +1,6 @@
 import re
+import pprint
+
 
 def splita_linha(linha):
     """
@@ -14,6 +16,7 @@ def splita_linha(linha):
     linha = linha.replace(">", "|")
     linha = linha.split("|")
     return linha
+
 
 def monta_producao(linha):
     """
@@ -32,6 +35,24 @@ def monta_producao(linha):
     return [cabeca, corpo]
 
 
+def le_linha(arquivo):
+    """
+    Lê uma linha do arquivo e lida com os comentarios, retornado apenas a parte
+    significativa da linha.
+    :param arquivo: file
+    :return: string
+    """
+    linha = arquivo.readline()
+    posicao = linha.find("#")
+    if posicao == -1:
+        return linha
+    elif posicao == 0:
+        for prefixo in ["#Terminais", "#Variaveis", "#Inicial", "#Regras"]:
+            if linha.startswith(prefixo):
+                return prefixo
+    return linha[:posicao]
+
+
 def monta_terminais(arquivo):
     """
     Pega os simbolos terminais da gramatica
@@ -39,15 +60,15 @@ def monta_terminais(arquivo):
     :param arquivo: file
     :return: lista de strings
     """
-    arquivo.readline() # esse readline eh pra pular a primeira linha do o arquivo, onde ta escrito "#Terminais"
+    le_linha(arquivo) # esse readline eh pra pular a primeira linha do o arquivo, onde ta escrito "#Terminais"
     terminais = []
-    linha = arquivo.readline() #Eu preciso ler um terminal antes de entrar no while. Seria melhor se tivesse do
-                               #  while em python
-    if linha != '#Variaveis\n':
+    linha = le_linha(arquivo) #Eu preciso ler um terminal antes de entrar no while. Seria melhor se tivesse do
+                                    #  while em python
+    if linha != '#Variaveis':
         terminais.append(re.split('[ | ]', linha)[1]) # Esse re.split() eh como str.split() com multiplos tokens
-    while (linha != '#Variaveis\n'): #vai pegando os terminais ateh chegar na linha em qua tah escrito "#Variaveis"
-        linha = arquivo.readline()
-        if linha != '#Variaveis\n':
+    while (linha != '#Variaveis'): #vai pegando os terminais ateh chegar na linha em qua tah escrito "#Variaveis"
+        linha = le_linha(arquivo)
+        if linha != '#Variaveis':
             terminais.append(re.split('[ | ]', linha)[1])
     return terminais
 
@@ -59,13 +80,14 @@ def monta_variaveis(arquivo):
     :param arquivo: file
     :return: lista de strings
     """
-    linha = arquivo.readline()
+    linha = le_linha(arquivo)
     variaveis = []
-    while (linha != '#Inicial\n'): #vai pegando os variaveis ateh chegar na linha em qua tah escrito "#Iniciais"
-        linha = arquivo.readline()
-        if linha != '#Inicial\n':
+    while (linha != '#Inicial'): #vai pegando os variaveis ateh chegar na linha em qua tah escrito "#Iniciais"
+        linha = le_linha(arquivo)
+        if linha != '#Inicial':
             variaveis.append(re.split('[ | ]', linha)[1])
     return variaveis
+
 
 def monta_producoes(arquivo):
     """
@@ -93,17 +115,49 @@ def le_arquivo(arquivo):
 
     terminais = monta_terminais(arquivo)
     variaveis = monta_variaveis(arquivo)
-    inicial = arquivo.readline()[2:-2]
+    inicial = le_linha(arquivo).strip()[2:-2]
     producoes = monta_producoes(arquivo)
 
-    print(terminais)
-    print(variaveis)
-    print(inicial)
-    print(producoes)
+    return (variaveis, terminais, producoes, inicial)
 
 
-try:
-    arquivo = open("gramatica_exemplo2.txt")
-    le_arquivo(arquivo)
-except FileNotFoundError:
-    print("Arquivo nao encontrado")
+class Gramatica:
+    def __init__(self, arquivo_gramatica):
+        with open(arquivo_gramatica, mode='r', encoding="utf-8") as arquivo:
+            dados = le_arquivo(arquivo)
+            self._variaveis = dados[0]
+            self._terminais = dados[1]
+            self._producoes = dados[2]
+            self._simbolo_inicial = dados[3]
+
+    @property
+    def variaveis(self):
+        return self._variaveis
+
+    @property
+    def terminais(self):
+        return self._terminais
+
+    @property
+    def producoes(self):
+        return self._producoes
+
+    @property
+    def simbolo_inicial(self):
+        return self._simbolo_inicial
+
+    def __str__(self):
+        return '''G = (V, T, P, {}), onde:
+V = {}, conjunto de variáveis.
+T = {}, conjunto de símbolos terminais.
+P = {}, regras de produção.
+{}, símbolo inicial.'''.format(self._simbolo_inicial, self._variaveis, self._terminais,
+                    pprint.pformat(self._producoes), self._simbolo_inicial)
+
+
+
+
+if __name__ == '__main__':
+    arquivo = input("Digite o nome do arquivo: ")
+    g = Gramatica(arquivo_gramatica=arquivo)
+    print(g)
