@@ -131,19 +131,19 @@ class Gramatica:
             self._simbolo_inicial = dados[3]
 
     @property
-    def variaveis(self):
+    def get_variaveis(self):
         return self._variaveis
 
     @property
-    def terminais(self):
+    def get_terminais(self):
         return self._terminais
 
     @property
-    def producoes(self):
+    def get_producoes(self):
         return self._producoes
 
     @property
-    def simbolo_inicial(self):
+    def get_simbolo_inicial(self):
         return self._simbolo_inicial
 
     def __str__(self):
