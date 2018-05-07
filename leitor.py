@@ -107,12 +107,19 @@ class Leitor:
                 variaveis.append(re.split('[ | ]', linha)[1])
         return variaveis
 
-    def get_terminais(self):
+    @property
+    def terminais(self):
         return self.__terminais
-    def get_variaveis(self):
+
+    @property
+    def variaveis(self):
         return self.__variaveis
-    def get_inicial(self):
+
+    @property
+    def inicial(self):
         return self.__inicial
-    def get_producoes(self):
+
+    @property
+    def producoes(self):
         return self.__producoes
 
