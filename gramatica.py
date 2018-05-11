@@ -85,3 +85,9 @@ class Gramatica():
         \nRegras de produção: \nP = {}
         \nSímbolo inicial: {}'''.format(self._simbolo_inicial, self._variaveis, self._terminais,
                     pprint.pformat(self._producoes), self._simbolo_inicial)
+
+
+if __name__ == '__main__':
+    arquivo = input("Digite o caminho do arquivo: ")
+    print(Gramatica(arquivo))
+    

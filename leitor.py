@@ -47,13 +47,13 @@ class Leitor:
         :return: lista de strings
         """
         self.__le_linha(arquivo)  # esse readline eh pra pular a primeira linha do o arquivo, onde ta escrito "#Terminais"
-        terminais = []
+        terminais = set()
         while True:
             linha = self.__le_linha(arquivo)
             if linha == '#Variaveis':
                 break
             else:
-                terminais.append(re.split('[ | ]', linha)[1])
+                terminais.add(re.split('[ | ]', linha)[1])
         return terminais
 
     def __monta_producao(self, linha):
@@ -70,7 +70,7 @@ class Leitor:
                                  #    dela pulando de 2 em 2 para nao pegar os caracteres inuteis ', ' ', '
             corpo.append(x[1:-1])  # Esse slice [1:-1] eh para tirar os espacos em branco
 
-        return [cabeca, corpo]
+        return (cabeca, tuple(corpo))
 
     def __monta_producoes(self, arquivo):
         """
@@ -80,7 +80,7 @@ class Leitor:
         :return: lista de lista de strings
         """
         self.__le_linha(arquivo)
-        producoes = []
+        producoes = set()
         while True:
             linha = self.__le_linha(arquivo)
             if linha == '':
@@ -88,7 +88,7 @@ class Leitor:
             else:
                 linha = self.__splita_linha(linha)
                 producao = self.__monta_producao(linha)
-                producoes.append(producao)
+                producoes.add(producao)
         return producoes
 
     def __monta_variaveis(self, arquivo):
@@ -98,13 +98,13 @@ class Leitor:
         :param arquivo: file
         :return: lista de strings
         """
-        variaveis = []
+        variaveis = set()
         while True:
             linha = self.__le_linha(arquivo)
             if linha == '#Inicial':
                 break
             else:
-                variaveis.append(re.split('[ | ]', linha)[1])
+                variaveis.add(re.split('[ | ]', linha)[1])
         return variaveis
 
     @property
@@ -122,4 +122,3 @@ class Leitor:
     @property
     def producoes(self):
         return self.__producoes
-
