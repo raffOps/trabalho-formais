@@ -31,52 +31,72 @@ class Gramatica():
         return self._simbolo_inicial
 
     def simplifica_gramatica(self):
+        """
+        Objetivo: simplificar um gramatica livre de contexto
+        :return:
+        """
         self.__remove_producoes_vazias()
 
     def __remove_producoes_vazias(self):
-        variaveis_com_prod_vazias = self.__pop_producoes_vazias()
-        adicao = []
-        for producao in self._producoes:
-            combinacoes = self.__get_comb_var_prod_vazias(producao, variaveis_com_prod_vazias)
-            for combinacao in combinacoes:
-                if len(combinacao) != len(producao[1]):
-                    adicao.append([producao[0], self.__diferenca(producao[1], combinacao)])
-        self._producoes.extend(adicao)
-
-    def __pop_producoes_vazias(self):
-        variaveis_com_prod_vazias = []
-        for producao in self._producoes:
-            if "V" in producao[1]:
-                variaveis_com_prod_vazias.append(producao[0])
-                del (self._producoes[self._producoes.index(producao)])
-        return variaveis_com_prod_vazias
-
-
-    def __diferenca(self, lista1, lista2):
-        diferenca = []
-        for elemento in lista1:
-            if elemento not in lista2:
-                diferenca.append(elemento)
-        return diferenca
-
-
-    def __get_comb_var_prod_vazias(self, producao, variaveis_com_prod_vazias):
         """
-        Objetivo: Dado um producao e a lista das variaveis com producoes vazias, retorna
-                    a combinacao dos termos que estao na intersecao desta com o corpo da producao
-        :Exemplo [['S', ['X', 'Y', 'Z', 'A']], ["X","Y", "A"] ->
-                        [["X"],["Y"],["A"],["X","A"],["X","Y"],["A","Y"],["X","Y","A"]]
-        :param producao: list
-        :param variaveis_com_prod_vazias: list
-        :return: combinacao_variaveis_com_prod_vazias
+        Objetivo: Dado um conjunto de producoes de uma glc, remove as producoes vazias diretas e indiretas
+        Exemplo: Considere "V" o simbolo de vazio e "T" o simbolo de terminal,
+         {(A, ("V",)), (B, ("V",)), (C, ("V",)), (D, ("A","B","C","T"))} ->
+            {(D, ("A","B","C","T")), (D, ("A","B","T")), (D, ("A","C","T")), (D, ("B","C","T")),
+            (D, ("A", "T")), (D, ("B","T")), (D, ("C","T")), (D, ("T",))}
+
+        :return:
+        """
+        self.__remove_producoes_vazias_indiretas(self.__pop_producoes_vazias_diretas())
+
+    def __pop_producoes_vazias_diretas(self):
+        """
+        Objetivo: Remove producoes diretas de producoes vazias e retorna as cabecas destas
+        Exemplo: {(A, ("V",)), (B, ("V",)), (C, ("V",)), (D, ("A","B","C","T"))} ->
+                    {(D, ("A","B","C","T"))}
+        :return: lista de cabecas das producoes excluidas
         :rtype: list
         """
-        variaveis_com_prod_vazias_no_corpo_prod = list(set(producao[1]).intersection(variaveis_com_prod_vazias))
-        combinacao_variaveis_com_prod_vazias = []
-        for tamanho in range(len(variaveis_com_prod_vazias_no_corpo_prod) + 1):
-            for combinacao in (combinations(variaveis_com_prod_vazias_no_corpo_prod, tamanho)):
-                combinacao_variaveis_com_prod_vazias.append(list(combinacao))
-        return combinacao_variaveis_com_prod_vazias[1:]
+        prod_vazias_dir = set()
+        for producao in self._producoes:
+            if "V" in producao[1]:
+                prod_vazias_dir.add(producao)
+        self._producoes = self._producoes - prod_vazias_dir
+        return [producao[0] for producao in list(prod_vazias_dir)]
+
+    def __remove_producoes_vazias_indiretas(self, vars_com_prod_vazias_dir):
+        """
+        Objetivo: Remove producoes indiretas de producoes vazias
+        Exemplo: {(D, ("A","B","C","T"))} , ["A","B","C"] ->
+                    {(D, ("A","B","C","T")), (D, ("A","B","T")), (D, ("A","C","T")), (D, ("B","C","T")),
+                    (D, ("A", "T")), (D, ("B","T")), (D, ("C","T")), (D, ("T",))}
+        :param vars_com_prod_vazias_dir: lista de cabecas das producoes com producoes vazias diretas
+        :return:
+        """
+        novas_producoes = []
+        for producao in self._producoes:
+            combinacoes = self.__get_combinacoes_de_variaveis_com_producao_vazia(producao[1], vars_com_prod_vazias_dir)
+            for combinacao in combinacoes:
+                if len(combinacao) != len(producao[1]):
+                    novas_producoes.append((producao[0], tuple(var for var in producao[1] if var not in combinacao)))
+        self._producoes.update(novas_producoes)
+
+    def __get_combinacoes_de_variaveis_com_producao_vazia(self, corpo_da_producao, vars_com_producoes_vazias_dir):
+        """
+        Objetivo: Dado o corpo de uma producao e lista da variaveis que produzem vazio diretamente, retorna
+                    a combinacao da intersecao destes
+        Exemplo: ("A","B","C,"D"), ["A", "B", "C"] -> (("A",), ("B",), ("B",), ("A", "B"), ("A", "C"),\
+                                                        ("C", "B"), ("A", "B", "C"))
+        :param corpo_da_producao: tuple
+        :param vars_com_producoes_vazias_dir: list
+        :return: combinacao da intersecao entre corpo_da_producao e vars_com_producoes_vazias_dir
+        :rtype: tuple
+        """
+        vars_com_prod_vazias_dir_nesse_corpo = set(corpo_da_producao).intersection(vars_com_producoes_vazias_dir)
+        combinacoes = []
+        for tamanho in range(len(vars_com_prod_vazias_dir_nesse_corpo)+1):
+            combinacoes.extend(tuple(combinations(vars_com_prod_vazias_dir_nesse_corpo, tamanho)))
+        return tuple(combinacoes[1:])
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), onde:
@@ -90,4 +110,4 @@ class Gramatica():
 if __name__ == '__main__':
     arquivo = input("Digite o caminho do arquivo: ")
     print(Gramatica(arquivo))
-    
+
