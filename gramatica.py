@@ -98,6 +98,55 @@ class Gramatica():
             combinacoes.extend(tuple(combinations(vars_com_prod_vazias_dir_nesse_corpo, tamanho)))
         return tuple(combinacoes[1:])
 
+    def __encontra_producoes_terminais(self, variavel):
+        possiveis_producoes = {producao for producao in self._producoes if producao[0] == variavel}
+        producoes_terminais = set()
+
+        for producao in possiveis_producoes:
+            palavra = ''
+            for simbolo in producao[1]:
+                palavra = palavra + simbolo
+            if palavra not in self._variaveis:
+                producoes_terminais.add(producao)
+        return producoes_terminais
+
+    def remove_producoes_unitarias(self):
+        fechos = {variavel: set() for variavel in self._variaveis}
+
+        for variavel in self._variaveis:
+            vars_unitarias = set()
+            for producao in self._producoes:
+                if producao[0] == variavel and len(producao[1]) == 1 and producao[1][0] in self._variaveis:
+                    vars_unitarias.add(producao[1][0])
+            fechos[variavel] = vars_unitarias
+
+        tamanhos = [len(fechos[variavel]) for variavel in fechos]
+        tamanhos_novo = []
+        while tamanhos != tamanhos_novo:
+            for variavel in self._variaveis:
+                for cabeca in fechos:
+                    if variavel in fechos[cabeca]:
+                        fechos[cabeca] = fechos[cabeca].union(fechos[variavel])
+            tamanhos = tamanhos_novo
+            tamanhos_novo = [len(fechos[variavel]) for variavel in fechos]
+
+        for cabeca in fechos:
+            if cabeca in fechos[cabeca]:
+                fechos[cabeca].remove(cabeca)
+
+        p1 = set()
+        for variavel in self._variaveis:
+            p1 = p1.union(self.__encontra_producoes_terminais(variavel))
+
+        for variavel in fechos:
+            for B in fechos[variavel]:
+                producoes_terminais = self.__encontra_producoes_terminais(B)
+                producoes_terminais = {(variavel, prod[1]) for prod in producoes_terminais}
+                p1 = p1.union(producoes_terminais)
+
+        self._producoes = p1
+
+
     def __str__(self):
         return '''\nG = (V, T, P, {}), onde:
         \nConjunto de variáveis: \n\tV = {}
@@ -109,5 +158,7 @@ class Gramatica():
 
 if __name__ == '__main__':
     arquivo = input("Digite o caminho do arquivo: ")
-    print(Gramatica(arquivo))
-
+    g = Gramatica(arquivo)
+    print(g)
+    g.remove_producoes_unitarias()
+    print(g)
