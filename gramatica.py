@@ -36,6 +36,9 @@ class Gramatica():
         :return:
         """
         self.__remove_producoes_vazias()
+        print(self)
+        self.__remove_producoes_unitarias()
+        print(self)
 
     def __remove_producoes_vazias(self):
         """
@@ -110,7 +113,7 @@ class Gramatica():
                 producoes_terminais.add(producao)
         return producoes_terminais
 
-    def remove_producoes_unitarias(self):
+    def __remove_producoes_unitarias(self):
         fechos = {variavel: set() for variavel in self._variaveis}
 
         for variavel in self._variaveis:
@@ -147,7 +150,7 @@ class Gramatica():
         self._producoes = p1
 
     def coloca_forma_chonsky(self):
-        lista_vars = "A B C D E F G H J L M N O P Q R S T U V X W Y Z".split()
+        lista_vars = "A B C D E F G H I J L M N O P Q R S T U V X W Y Z".split()
         vars_disponiveis = [vars for vars in lista_vars
                                 if vars not in self._variaveis]
 
@@ -179,8 +182,6 @@ class Gramatica():
 
     def __remove_prods_que_misturam_vars_com_term(self, variaveis_disponiveis):
 
-        novas_producoes = []
-        producoes_para_excluir = []
         producoes = list(self._producoes)
         for producao in range(len(producoes)):
             tamanho_corpo = len(producoes[producao][1])

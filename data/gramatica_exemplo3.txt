@@ -1,7 +1,5 @@
 #Terminais
 [ a ]
-[ b ]
-[ c ]
 #Variaveis
 [ A ]
 [ B ]
@@ -10,7 +8,9 @@
 #Inicial
 [ A ]
 #Regras
-[ A ] > [ B ] [ a ] [ C ] [ b ] [ D ]
+[ A ] > [ B ]
 [ B ] > [ A ]
-[ C ] > [ b ]
-[ D ] > [ c ]
+[ C ] > [ B ]
+[ C ] > [ D ]
+[ D ] > [ D ]
+[ D ] > [ a ]
