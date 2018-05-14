@@ -146,6 +146,31 @@ class Gramatica():
 
         self._producoes = p1
 
+    def coloca_forma_chonsky(self):
+        lista_variaveis = "A B C D E F G H J L M N O P Q R S T U V X W Y Z".split()
+        variveis_disponiveis = [variaveis for variaveis in lista_variaveis
+                                if variaveis not in self._variaveis]
+        producoes = list(self._producoes)
+
+        novas_producoes = set()
+        producoes_para_excluir = set()
+        for producao in self._producoes:
+            if len(producao[1]) > 2:
+                for item in range(len(producao[1])):
+                    if producao[1][item] in self._terminais:
+                        self._variaveis.update(variveis_disponiveis[0])
+                        producao_substituta = list(producao[1])
+                        producao_substituta[item] = variveis_disponiveis[0]
+                        novas_producoes.add((variveis_disponiveis[0], producao[1][item]))
+                        novas_producoes.add((producao[0], tuple(producao_substituta)))
+                        producoes_para_excluir.add(producao)
+                        print(producao)
+
+                        variveis_disponiveis.pop(0)
+
+        print(producoes_para_excluir)
+        self._producoes.update(novas_producoes)
+        self._producoes.difference_update(producoes_para_excluir)
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), onde:
