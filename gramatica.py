@@ -61,7 +61,7 @@ class Gramatica():
         for producao in self._producoes:
             if "V" in producao[1]:
                 prod_vazias_dir.add(producao)
-        self._producoes = self._producoes - prod_vazias_dir
+        self._producoes.difference_update(prod_vazias_dir)
         return [producao[0] for producao in list(prod_vazias_dir)]
 
     def __remove_producoes_vazias_indiretas(self, vars_com_prod_vazias_dir):
@@ -147,30 +147,55 @@ class Gramatica():
         self._producoes = p1
 
     def coloca_forma_chonsky(self):
-        lista_variaveis = "A B C D E F G H J L M N O P Q R S T U V X W Y Z".split()
-        variveis_disponiveis = [variaveis for variaveis in lista_variaveis
-                                if variaveis not in self._variaveis]
+        lista_vars = "A B C D E F G H J L M N O P Q R S T U V X W Y Z".split()
+        vars_disponiveis = [vars for vars in lista_vars
+                                if vars not in self._variaveis]
+
+        vars_disponiveis = self.__remove_prods_que_misturam_vars_com_term(vars_disponiveis)
+        #self.__remove_producoes_maiorq2(vars_disponiveis)
+
+    # def __remove_producoes_maiorq2(self, vars_disponiveis):
+    #     continuar = True
+    #     while continuar:
+    #         novas_producoes = set()
+    #         producoes_para_excluir = set()
+    #         for producao in self._producoes:
+    #             tamanho_corpo = len(producao[1])
+    #             if tamanho_corpo > 2:
+    #                 producoes_para_excluir.add(producao)
+    #                 for index in range(0,tamanho_corpo-1,2):
+    #                     novas_producoes.add((vars_disponiveis[0], producao[1][index: index + 2]))
+    #                     vars_disponiveis.pop(0)
+    #                 if (tamanho_corpo % 2) != 0:
+    #                     novas_producoes.add((vars_disponiveis[0], producao[1][-1]))
+    #                     vars_disponiveis.pop(0)
+    #         if len(novas_producoes) > 0:
+    #             self._producoes.difference_update(producoes_para_excluir)
+    #             self._producoes.update(novas_producoes)
+    #
+    #         else:
+    #             continuar = False
+
+
+    def __remove_prods_que_misturam_vars_com_term(self, variaveis_disponiveis):
+
+        novas_producoes = []
+        producoes_para_excluir = []
         producoes = list(self._producoes)
+        for producao in range(len(producoes)):
+            tamanho_corpo = len(producoes[producao][1])
+            if tamanho_corpo > 2:
+                for item_corpo in range(tamanho_corpo):
+                    if producoes[producao][1][item_corpo] in self._terminais:
+                        self._variaveis.update(variaveis_disponiveis[0])
+                        producao_substituta = list(producoes[producao][1])
+                        producao_substituta[item_corpo] = variaveis_disponiveis[0]
+                        producoes.append((variaveis_disponiveis[0], producoes[producao][1][item_corpo]))
+                        producoes[producao] = (producoes[producao][0], tuple(producao_substituta))
+                        variaveis_disponiveis.pop(0)
 
-        novas_producoes = set()
-        producoes_para_excluir = set()
-        for producao in self._producoes:
-            if len(producao[1]) > 2:
-                for item in range(len(producao[1])):
-                    if producao[1][item] in self._terminais:
-                        self._variaveis.update(variveis_disponiveis[0])
-                        producao_substituta = list(producao[1])
-                        producao_substituta[item] = variveis_disponiveis[0]
-                        novas_producoes.add((variveis_disponiveis[0], producao[1][item]))
-                        novas_producoes.add((producao[0], tuple(producao_substituta)))
-                        producoes_para_excluir.add(producao)
-                        print(producao)
-
-                        variveis_disponiveis.pop(0)
-
-        print(producoes_para_excluir)
-        self._producoes.update(novas_producoes)
-        self._producoes.difference_update(producoes_para_excluir)
+        self._producoes = set(producoes)
+        return variaveis_disponiveis
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), onde:
