@@ -7,10 +7,12 @@
 [ B ]
 [ C ]
 [ D ]
+[ E ]
 #Inicial
 [ A ]
 #Regras
-[ A ] > [ B ] [ a ] [ C ] [ b ] [ D ] [ c ]
-[ B ] > [ A ]
+[ A ] > [ B ] [ E ] [ a ] [ C ] [ D ]
+[ B ] > [ C ]
 [ C ] > [ b ]
-[ D ] > [ c ]
+[ E ] > [ V ]
+[ D ] > [ V ]

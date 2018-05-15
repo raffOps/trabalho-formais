@@ -1,6 +1,7 @@
 import pprint
 from leitor import Leitor
 from itertools import combinations
+from collections import defaultdict
 
 #todo: documentacao da
 
@@ -35,10 +36,17 @@ class Gramatica():
         Objetivo: simplificar um gramatica livre de contexto
         :return:
         """
-        self.__remove_producoes_vazias()
-        print(self)
-        self.__remove_producoes_unitarias()
-        print(self)
+        #print("remove_producoes_vazias\n")
+        #self.__remove_producoes_vazias()
+        #print(self)
+        #print("#######################")
+        #print("\n\nremove_producoes_unitarais\n")
+        #self.__remove_producoes_unitarias()
+        #print(self)
+        self.chonskfy()
+        #print("\n\nremove_variaveis_nao_geradoras\n")
+        #self.__remove_variaveis_nao_geradoras()
+        #print(self)
 
     def __remove_producoes_vazias(self):
         """
@@ -149,57 +157,91 @@ class Gramatica():
 
         self._producoes = p1
 
-    def coloca_forma_chonsky(self):
+    def chonskfy(self):
         lista_vars = "A B C D E F G H I J L M N O P Q R S T U V X W Y Z".split()
+        combinacaoes = combinations(lista_vars, 2)
+        lista_vars.extend([''.join(combinacao) for combinacao in combinacaoes])
+
         vars_disponiveis = [vars for vars in lista_vars
-                                if vars not in self._variaveis]
+                            if vars not in self._variaveis]
 
         vars_disponiveis = self.__remove_prods_que_misturam_vars_com_term(vars_disponiveis)
-        #self.__remove_producoes_maiorq2(vars_disponiveis)
-
-    # def __remove_producoes_maiorq2(self, vars_disponiveis):
-    #     continuar = True
-    #     while continuar:
-    #         novas_producoes = set()
-    #         producoes_para_excluir = set()
-    #         for producao in self._producoes:
-    #             tamanho_corpo = len(producao[1])
-    #             if tamanho_corpo > 2:
-    #                 producoes_para_excluir.add(producao)
-    #                 for index in range(0,tamanho_corpo-1,2):
-    #                     novas_producoes.add((vars_disponiveis[0], producao[1][index: index + 2]))
-    #                     vars_disponiveis.pop(0)
-    #                 if (tamanho_corpo % 2) != 0:
-    #                     novas_producoes.add((vars_disponiveis[0], producao[1][-1]))
-    #                     vars_disponiveis.pop(0)
-    #         if len(novas_producoes) > 0:
-    #             self._producoes.difference_update(producoes_para_excluir)
-    #             self._producoes.update(novas_producoes)
-    #
-    #         else:
-    #             continuar = False
-
+        self.__remove_producoes_maiorq2(vars_disponiveis)
 
     def __remove_prods_que_misturam_vars_com_term(self, variaveis_disponiveis):
 
         producoes = list(self._producoes)
+        dict_vars_novas = dict()
+
         for producao in range(len(producoes)):
             tamanho_corpo = len(producoes[producao][1])
-            if tamanho_corpo > 2:
+            if tamanho_corpo > 1:
                 for item_corpo in range(tamanho_corpo):
                     if producoes[producao][1][item_corpo] in self._terminais:
-                        self._variaveis.update(variaveis_disponiveis[0])
                         producao_substituta = list(producoes[producao][1])
-                        producao_substituta[item_corpo] = variaveis_disponiveis[0]
-                        producoes.append((variaveis_disponiveis[0], producoes[producao][1][item_corpo]))
+                        nova_variavel = dict_vars_novas.setdefault(producao_substituta[item_corpo],
+                                                                  variaveis_disponiveis[0])
+                        self._variaveis.update(nova_variavel)
+                        producao_substituta[item_corpo] = nova_variavel
+                        producoes.append((nova_variavel, producoes[producao][1][item_corpo]))
                         producoes[producao] = (producoes[producao][0], tuple(producao_substituta))
-                        variaveis_disponiveis.pop(0)
+                        if nova_variavel == variaveis_disponiveis[0]:
+                            variaveis_disponiveis.pop(0)
 
         self._producoes = set(producoes)
         return variaveis_disponiveis
 
+    def __remove_producoes_maiorq2(self, vars_disponiveis):
+        producoes = list(self._producoes)
+        for producao in producoes:
+            if len(producao[1]) > 2:
+                novas_producoes = self.__separa_producao(producao, vars_disponiveis)
+                self._producoes.remove(producao)
+                self._producoes.update(novas_producoes)
+
+    def __separa_producao(self, producao, vars_disponiveis):
+        producao = [producao[0], list(producao[1])]
+        tamanho_producao = len(producao[1])
+        novas_producoes = []
+        vars_novas = []
+        while tamanho_producao > 2:
+            vars_novas.clear()
+            for index in range(0, tamanho_producao-1, 2):
+                novas_producoes.append((vars_disponiveis[0], tuple(producao[1][index:index+2])))
+                vars_novas.append(vars_disponiveis[0])
+                vars_disponiveis.pop(0)
+            if tamanho_producao % 2 == 1:
+                vars_novas.append(producao[1][-1])
+            self._variaveis.update(vars_novas)
+            producao = [producao[0], vars_novas.copy()]
+            tamanho_producao = len(producao[1])
+        novas_producoes.append((producao[0], tuple(vars_novas)))
+        return novas_producoes
+
+    # def __remove_variaveis_nao_geradoras(self):
+    #     terminais_absolutos = self.__get_terminais_absolutos()
+    #     self._producoes = set([producao for producao in self._producoes
+    #                            if all([item in terminais_absolutos for item in producao[1]])])
+    #     self._variaveis = set()
+    #     for producao in self._producoes:
+    #         self._variaveis.add(producao[0])
+    #
+    # def __get_terminais_absolutos(self):
+    #     terminais_absolutos = self._terminais.copy()
+    #     tamanho_antigo = len(terminais_absolutos)
+    #     while True:
+    #         for producao in self.producoes:
+    #             if all(item in terminais_absolutos for item in producao[1]):
+    #                 terminais_absolutos.add(producao[0])
+    #         tamanho_novo = len(terminais_absolutos)
+    #         if tamanho_novo == tamanho_antigo:
+    #             break
+    #         else:
+    #             tamanho_antigo = tamanho_novo
+    #     return terminais_absolutos
+
     def __str__(self):
-        return '''\nG = (V, T, P, {}), onde:
+        return '''\nG = (V, T, P, {}), ondse:
         \nConjunto de variáveis: \n\tV = {}
         \nConjunto de símbolos terminais: \n\tT = {}
         \nRegras de produção: \nP = {}
