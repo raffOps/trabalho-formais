@@ -240,6 +240,76 @@ class Gramatica():
     #             tamanho_antigo = tamanho_novo
     #     return terminais_absolutos
 
+    def remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo(self):
+        """Comentar
+        """
+        variaveis_e_terminais = self.terminais | self.variaveis
+        novo_set_producoes = set()
+        for producao in self.producoes:
+            if all(item in variaveis_e_terminais for item in producao[1]):
+                novo_set_producoes.add(producao)
+
+        self.producoes.intersection_update(novo_set_producoes)
+
+    def remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo(self):
+        """Comentar
+        """
+        variaveis_terminais = set()
+        terminais_absolutos = set() | self.terminais
+        tamanho_antigo = 0
+        tamanho_novo = 0
+
+        while True:
+            for producao in self.producoes:
+                if all(item in terminais_absolutos for item in producao[1]):
+                    terminais_absolutos.add(producao[0])
+                    variaveis_terminais.add(producao[0])
+            tamanho_novo = len(variaveis_terminais)
+
+            if tamanho_antigo == tamanho_novo:
+                break
+            else:
+                tamanho_antigo = tamanho_novo
+
+        self.variaveis.intersection_update(variaveis_terminais)
+        print(self.variaveis)
+
+        self.remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
+        terminais_absolutos.clear()
+
+    def remove_simbolos_nao_atingiveis(self):
+        """Comentar
+        """
+        terminais = set()
+        variaveis = set() | self.variaveis
+        len_terminais_antigo = 0
+        len_terminais_novo = 0
+        len_variaveis_antigo = 0
+        len_variaveis_novo = 0
+        while True:
+            for producao in self.producoes:
+                if producao[0] in variaveis:
+                    for item in producao[1]:
+                        if item in self.variaveis:
+                            variaveis.add(item)
+                        elif item in self.terminais:
+                            terminais.add(item)
+            if len_terminais_antigo == len_terminais_novo and len_variaveis_antigo == len_variaveis_novo:
+                break
+            else:
+                len_terminais_antigo = len_terminais_novo
+                len_variaveis_antigo = len_variaveis_novo
+        self.variaveis.intersection_update(variaveis)
+        self.terminais.intersection_update(terminais)
+
+        self.remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
+
+    def exclusao_simbolos_inuteis(self):
+        """Comentar
+        """
+        self.remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo()
+        self.remove_simbolos_nao_atingiveis()
+
     def __str__(self):
         return '''\nG = (V, T, P, {}), ondse:
         \nConjunto de variáveis: \n\tV = {}
