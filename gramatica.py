@@ -37,13 +37,21 @@ class Gramatica():
         :return:
         """
         #print("remove_producoes_vazias\n")
-        #self.__remove_producoes_vazias()
-        #print(self)
+        self.__remove_producoes_vazias()
+        print("REMOCAO DE PRODUCOES VAZIAS")
+        print(self)
+        print("######################################\n\n")
         #print("#######################")
         #print("\n\nremove_producoes_unitarais\n")
-        #self.__remove_producoes_unitarias()
+        self.__remove_producoes_unitarias()
+        print("REMOCAO DE PRODUCOES UNITARIAS")
+        print(self)
+        print("######################################\n\n")
+        self.__exclusao_simbolos_inuteis()
+        print("REMOCAO DE SIMBOLOS INUTEIS")
+        print(self)
+        print("######################################\n\n")
         #print(self)
-        self.chonskfy()
         #print("\n\nremove_variaveis_nao_geradoras\n")
         #self.__remove_variaveis_nao_geradoras()
         #print(self)
@@ -59,6 +67,7 @@ class Gramatica():
         :return:
         """
         self.__remove_producoes_vazias_indiretas(self.__pop_producoes_vazias_diretas())
+        self._producoes.add((self._simbolo_inicial, ("V",))) #inclusao da palavra vazia
 
     def __pop_producoes_vazias_diretas(self):
         """
@@ -240,7 +249,7 @@ class Gramatica():
     #             tamanho_antigo = tamanho_novo
     #     return terminais_absolutos
 
-    def remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo(self):
+    def __remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo(self):
         """Comentar
         """
         variaveis_e_terminais = self.terminais | self.variaveis
@@ -251,13 +260,12 @@ class Gramatica():
 
         self.producoes.intersection_update(novo_set_producoes)
 
-    def remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo(self):
+    def __remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo(self):
         """Comentar
         """
         variaveis_terminais = set()
         terminais_absolutos = set() | self.terminais
         tamanho_antigo = 0
-        tamanho_novo = 0
 
         while True:
             for producao in self.producoes:
@@ -274,10 +282,10 @@ class Gramatica():
         self.variaveis.intersection_update(variaveis_terminais)
         print(self.variaveis)
 
-        self.remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
+        self.__remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
         terminais_absolutos.clear()
 
-    def remove_simbolos_nao_atingiveis(self):
+    def __remove_simbolos_nao_atingiveis(self):
         """Comentar
         """
         terminais = set()
@@ -302,13 +310,13 @@ class Gramatica():
         self.variaveis.intersection_update(variaveis)
         self.terminais.intersection_update(terminais)
 
-        self.remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
+        self.__remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
 
-    def exclusao_simbolos_inuteis(self):
+    def __exclusao_simbolos_inuteis(self):
         """Comentar
         """
-        self.remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo()
-        self.remove_simbolos_nao_atingiveis()
+        self.__remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo()
+        self.__remove_simbolos_nao_atingiveis()
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), ondse:
