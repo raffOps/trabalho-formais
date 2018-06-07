@@ -7,3 +7,4 @@ g = Gramatica(arquivo_gramatica="data/g6.txt")
 #print("FORMA DE CHONSKY")
 palavra = "abaab"
 print("\nA palavra {} eh reconhecida pela gramatica?".format(palavra), g.reconhece_palavra(palavra))
+print(g.tabela_CYK)

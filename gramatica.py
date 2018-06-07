@@ -33,6 +33,14 @@ class Gramatica():
     def simbolo_inicial(self):
         return self._simbolo_inicial
 
+    @property
+    def tabela_CYK(self):
+        tabela = ""
+        for linha in self.__tabela_CYK[::-1]:
+            tabela += str(linha)
+            tabela += "\n"
+        return tabela
+
     def simplifica_gramatica(self):
         """
         Objetivo: simplificar um gramatica livre de contexto
@@ -331,8 +339,6 @@ class Gramatica():
 
         self.__CYK_primeira_etapa(palavra)
         self.__CYK_segunda_etapa(len(palavra))
-        for linha in self.__tabela_CYK[::-1]:
-            print(linha)
 
     def __CYK_primeira_etapa(self, palavra):
         self.__tabela_CYK = []
