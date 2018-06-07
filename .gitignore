@@ -101,7 +101,7 @@ ENV/
 .mypy_cache/
 
 #pycharm
-.idea/*
-
-
+.idea
 \.directory
+*.xml
+*.iml

@@ -3,6 +3,7 @@ from leitor import Leitor
 from itertools import combinations
 from collections import defaultdict
 
+
 #todo: documentacao da
 
 
@@ -14,6 +15,7 @@ class Gramatica():
             self._terminais = dados.terminais
             self._producoes = dados.producoes
             self._simbolo_inicial = dados.inicial
+            self.__tabela_CYK = None
 
     @property
     def variaveis(self):
@@ -317,6 +319,45 @@ class Gramatica():
         """
         self.__remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo()
         self.__remove_simbolos_nao_atingiveis()
+
+    def reconhece_palavra(self, palavra):
+        self.__cria_tabela(palavra)
+        if self._simbolo_inicial in self.__tabela_CYK[-1][0]:
+            return True
+        else:
+            return False
+
+    def __cria_tabela(self, palavra):
+
+        self.__CYK_primeira_etapa(palavra)
+        self.__CYK_segunda_etapa(len(palavra))
+        for linha in self.__tabela_CYK[::-1]:
+            print(linha)
+
+    def __CYK_primeira_etapa(self, palavra):
+        self.__tabela_CYK = []
+        self.__tabela_CYK.append(list(palavra))
+        self.__tabela_CYK.append([])
+        for terminal in self.__tabela_CYK[0]:
+            self.__tabela_CYK[1].append([cabeca for cabeca, corpo in self._producoes if corpo == tuple(terminal)])
+
+    def __CYK_segunda_etapa(self, tamanho_palavra):
+        for s in range(2, tamanho_palavra + 1):
+            linha = []
+            for r in range(0, tamanho_palavra - s + 1):
+                coluna = []
+                for k in range(1, s):
+                    elemento_b = self.__tabela_CYK[k][r]
+                    elemento_c = self.__tabela_CYK[s - k][r + k]
+                    bc_combinacoes = [[b, c] for c in elemento_c for b in elemento_b]
+                    for cabeca, corpo in self._producoes:
+                        for producao in bc_combinacoes:
+                            if list(corpo) == producao:
+                                coluna.append(cabeca)
+                coluna = list(set(coluna))
+                linha.append(coluna)
+            self.__tabela_CYK.append(linha)
+
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), ondse:
