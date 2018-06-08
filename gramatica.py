@@ -365,10 +365,6 @@ class Gramatica():
                                 #print("########################")
                                 if list(cabeca) == self._tabela_CYK[s][r] and tupla == corpo:
                                     tuplas_validas.add(tupla)
-
-                        #print(tuplas_validas)
-                        #print("########################")
-                        #
                         self._tabela_CYK[k][r] = set()
                         self._tabela_CYK[s - k][r + k] = set()
                         for tupla in tuplas_validas:
