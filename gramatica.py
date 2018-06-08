@@ -1,11 +1,6 @@
 import pprint
 from leitor import Leitor
 from itertools import combinations
-from collections import defaultdict
-
-
-#todo: documentacao da
-
 
 class Gramatica():
     def __init__(self, arquivo_gramatica):
@@ -15,7 +10,7 @@ class Gramatica():
             self._terminais = dados.terminais
             self._producoes = dados.producoes
             self._simbolo_inicial = dados.inicial
-            self.__tabela_CYK = None
+            self._tabela_CYK = None
 
     @property
     def variaveis(self):
@@ -35,11 +30,7 @@ class Gramatica():
 
     @property
     def tabela_CYK(self):
-        tabela = ""
-        for linha in self.__tabela_CYK[::-1]:
-            tabela += str(linha)
-            tabela += "\n"
-        return tabela
+        return self._tabela_CYK
 
     def simplifica_gramatica(self):
         """
@@ -237,28 +228,6 @@ class Gramatica():
         novas_producoes.append((producao[0], tuple(vars_novas)))
         return novas_producoes
 
-    # def __remove_variaveis_nao_geradoras(self):
-    #     terminais_absolutos = self.__get_terminais_absolutos()
-    #     self._producoes = set([producao for producao in self._producoes
-    #                            if all([item in terminais_absolutos for item in producao[1]])])
-    #     self._variaveis = set()
-    #     for producao in self._producoes:
-    #         self._variaveis.add(producao[0])
-    #
-    # def __get_terminais_absolutos(self):
-    #     terminais_absolutos = self._terminais.copy()
-    #     tamanho_antigo = len(terminais_absolutos)
-    #     while True:
-    #         for producao in self.producoes:
-    #             if all(item in terminais_absolutos for item in producao[1]):
-    #                 terminais_absolutos.add(producao[0])
-    #         tamanho_novo = len(terminais_absolutos)
-    #         if tamanho_novo == tamanho_antigo:
-    #             break
-    #         else:
-    #             tamanho_antigo = tamanho_novo
-    #     return terminais_absolutos
-
     def __remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo(self):
         """Comentar
         """
@@ -330,31 +299,31 @@ class Gramatica():
 
     def reconhece_palavra(self, palavra):
         self.__cria_tabela(palavra)
-        if self._simbolo_inicial in self.__tabela_CYK[-1][0]:
+        if self._simbolo_inicial in self._tabela_CYK[0][0]:
             return True
         else:
             return False
 
     def __cria_tabela(self, palavra):
 
-        self.__CYK_primeira_etapa(palavra)
-        self.__CYK_segunda_etapa(len(palavra))
+        self.__cyk_primeira_etapa(palavra)
+        self.__cyk_segunda_etapa(len(palavra))
 
-    def __CYK_primeira_etapa(self, palavra):
-        self.__tabela_CYK = []
-        self.__tabela_CYK.append(list(palavra))
-        self.__tabela_CYK.append([])
-        for terminal in self.__tabela_CYK[0]:
-            self.__tabela_CYK[1].append([cabeca for cabeca, corpo in self._producoes if corpo == tuple(terminal)])
+    def __cyk_primeira_etapa(self, palavra):
+        self._tabela_CYK = []
+        self._tabela_CYK.append(list(palavra))
+        self._tabela_CYK.append([])
+        for terminal in self._tabela_CYK[0]:
+            self._tabela_CYK[1].append([cabeca for cabeca, corpo in self._producoes if corpo == tuple(terminal)])
 
-    def __CYK_segunda_etapa(self, tamanho_palavra):
+    def __cyk_segunda_etapa(self, tamanho_palavra):
         for s in range(2, tamanho_palavra + 1):
             linha = []
             for r in range(0, tamanho_palavra - s + 1):
                 coluna = []
                 for k in range(1, s):
-                    elemento_b = self.__tabela_CYK[k][r]
-                    elemento_c = self.__tabela_CYK[s - k][r + k]
+                    elemento_b = self._tabela_CYK[k][r]
+                    elemento_c = self._tabela_CYK[s - k][r + k]
                     bc_combinacoes = [[b, c] for c in elemento_c for b in elemento_b]
                     for cabeca, corpo in self._producoes:
                         for producao in bc_combinacoes:
@@ -362,8 +331,56 @@ class Gramatica():
                                 coluna.append(cabeca)
                 coluna = list(set(coluna))
                 linha.append(coluna)
-            self.__tabela_CYK.append(linha)
+            self._tabela_CYK.append(linha)
+        #self._tabela_CYK = self._tabela_CYK[::-1]
+        #print(self._tabela_CYK[0][0])
 
+    def limpa_tabela(self, tamanho_palavra):
+
+        if len(self._tabela_CYK[0]) > 1:
+            #self._tabela_CYK = self._tabela_CYK[::-1]
+            self._tabela_CYK[-1][0] = ["S"]
+            for s in range(tamanho_palavra, 1, -1):
+                for r in range(tamanho_palavra - s + 1):
+                    #print("linha {}, coluna {}".format(s,r))
+                    #print(self._tabela_CYK[s][r])
+                    #print("~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                    #print(self._tabela_CYK[s][r])
+                    print("linha {}, coluna {}".format(s, r))
+                    #print("########################")
+                    for k in range(1, s):
+                        tuplas_validas = set()
+                        elementos_b = self._tabela_CYK[k][r]
+                        elementos_c = self._tabela_CYK[s - k][r + k]
+                        #print(elementos_b)
+                        #print("______________________")
+                        #print(elementos_c)
+                        #print("########################")
+                        tuplas = set([(b, c) for c in elementos_c for b in elementos_b])
+                        #print(tuplas)
+                        for tupla in tuplas:
+                            for cabeca, corpo in self._producoes:
+                                #print(self._tabela_CYK[s][r])
+                                #print("linha {}, coluna {}".format(s, r))
+                                #print("########################")
+                                if list(cabeca) == self._tabela_CYK[s][r] and tupla == corpo:
+                                    tuplas_validas.add(tupla)
+
+                        #print(tuplas_validas)
+                        #print("########################")
+                        #
+                        self._tabela_CYK[k][r] = set()
+                        self._tabela_CYK[s - k][r + k] = set()
+                        for tupla in tuplas_validas:
+                            self._tabela_CYK[k][r].add(tupla[0])
+                            self._tabela_CYK[s - k][r + k].add(tupla[1])
+                        self._tabela_CYK[k][r] = list(self._tabela_CYK[k][r])
+                        self._tabela_CYK[s - k][r + k] = list(self._tabela_CYK[s - k][r + k])
+
+                        print(self._tabela_CYK[k][r])
+                        print(self._tabela_CYK[s - k][r + k])
+                        print("########################")
+        self._tabela_CYK = self._tabela_CYK[::-1]
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), ondse:
@@ -377,6 +394,6 @@ class Gramatica():
 if __name__ == '__main__':
     arquivo = input("Digite o caminho do arquivo: ")
     g = Gramatica(arquivo)
-    print(g)
-    g.remove_producoes_unitarias()
-    print(g)
+    #print(g)
+    #g.remove_producoes_unitarias()
+    #print(g)
