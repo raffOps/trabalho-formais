@@ -1,5 +1,6 @@
 from gramatica import *
 
+print("Lembrete: O arquivo de entrada deve ser colocados na pasta data")
 arquivo = input("Digite o nome do arquivo: ")
 g = Gramatica(arquivo_gramatica="data/" + arquivo)
 g.remove_producoes_vazias()

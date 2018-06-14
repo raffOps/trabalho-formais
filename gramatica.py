@@ -1,7 +1,7 @@
 import pprint
-from leitor import Leitor
 from itertools import combinations
 from arvore_derivacao import ArvoreDerivacao
+from leitor import Leitor
 
 
 class Gramatica():
@@ -86,7 +86,7 @@ class Gramatica():
         for producao in self._producoes:
             combinacoes = self.__get_combinacoes_de_variaveis_com_producao_vazia(producao[1], vars_com_prod_vazias_dir)
             for combinacao in combinacoes:
-                if len(combinacao) != len(producao[1]): # evita insercao de producao vazia
+                if len(combinacao) != len(producao[1]):  # evita insercao de producao vazia
                     novas_producoes.append((producao[0], tuple(var for var in producao[1] if var not in combinacao)))
         self._producoes.update(novas_producoes)
 
@@ -232,7 +232,7 @@ class Gramatica():
         # Criacao da lista de variaveis disponiveis
         lista_vars = "A B C D E F G H I J L M N O P Q R S T U V X W Y Z".split()
         # adiciona a combinacao 2 a 2 dos termos da lista na lista
-        lista_vars.extend([b+c for c in lista_vars for b in lista_vars])
+        lista_vars.extend([b + c for c in lista_vars for b in lista_vars])
 
         # Retira as variaveis jah utilizadas
         vars_disponiveis = [vars for vars in lista_vars if vars not in self._variaveis]
@@ -251,14 +251,14 @@ class Gramatica():
 
         for producao in range(len(producoes)):
 
-            #tamanho da corpo de cada producao
+            # tamanho da corpo de cada producao
             tamanho_corpo = len(producoes[producao][1])
 
             # Se houver terminais em producoes maiores que 2, troca por uma nova variavel
             if tamanho_corpo > 1:
                 for item_corpo in range(tamanho_corpo):
                     if producoes[producao][1][item_corpo] in self._terminais:
-                        #copia da producao
+                        # copia da producao
                         producao_substituta = list(producoes[producao][1])
                         # Verifica se ja existe uma variavel que produza o terminal. Se sim retorna a variavel, se nao
                         #    pega uma variavel nova e insere no dicionario
@@ -290,7 +290,7 @@ class Gramatica():
         """
         producoes = list(self._producoes)
         for producao in producoes:
-        # Atualiza as producoes para que elas sejam de tamanho 2 no maximo
+            # Atualiza as producoes para que elas sejam de tamanho 2 no maximo
             if len(producao[1]) > 2:
                 novas_producoes = self.__separa_producao(producao, vars_disponiveis)
                 self._producoes.remove(producao)
@@ -332,6 +332,13 @@ class Gramatica():
         return novas_producoes
 
     def reconhece_palavra(self, palavra):
+        """
+        Objetivo: identificar se uma palavra pertence a gramatica
+        :param palavra:
+        :type palavra: str
+        :return: Se a palavra pertence ou nao a gramatica
+        :rtype: bool
+        """
         self.__cria_tabela(palavra)
         self._tabela_CYK = self._tabela_CYK[::-1]
         return self._simbolo_inicial in self._tabela_CYK[0][0]
@@ -341,27 +348,43 @@ class Gramatica():
         self.__cyk_segunda_etapa(len(palavra))
 
     def __cyk_primeira_etapa(self, palavra):
+        """
+        Objetivo: prencher a tabela com as letras da palavra, assim como com as variaveis que produzem cada letra
+        :param palavra: a palavra a ser reconhecida pela gramatica
+        :type palavra: str
+        :return:
+        """
         self._tabela_CYK = []
         self._tabela_CYK.append(list(palavra))
         self._tabela_CYK.append([])
         for terminal in self._tabela_CYK[0]:
-            self._tabela_CYK[1].append([cabeca for cabeca, corpo in self._producoes if ''.join(corpo) == terminal])
+            self._tabela_CYK[1].append(set([cabeca for cabeca, corpo in self._producoes if ''.join(corpo) == terminal]))
 
     def __cyk_segunda_etapa(self, tamanho_palavra):
+        """
+        Objetivo: prencher a tabela com as variaveis que produzem 2 variaveis
+        :param tamanho_palavra: o tamanho da palavra a ser reconhecida pela gramatica
+        :type tamanho_palavra: int
+        :return:
+        """
+        # Percorre as linhas da tabela
         for s in range(2, tamanho_palavra + 1):
             linha = []
+            # Percorre as colunas da tabela
             for r in range(0, tamanho_palavra - s + 1):
-                coluna = []
+                celula_mestre = set()
                 for k in range(1, s):
-                    elemento_b = self._tabela_CYK[k][r]
-                    elemento_c = self._tabela_CYK[s - k][r + k]
-                    bc_combinacoes = [[b, c] for c in elemento_c for b in elemento_b]
+                    # Percorre em ordens opostas as celulas abaixo e na diagonal da celula mestre
+                    elemento_b = self._tabela_CYK[k][r]  # Elemento abaixo
+                    elemento_c = self._tabela_CYK[s - k][r + k]  # Elemento na diagonal
+                    bc_combinacoes = [[b, c] for c in elemento_c for b in elemento_b]  # combinacao 2 a 2 dos elementos
                     for cabeca, corpo in self._producoes:
                         for producao in bc_combinacoes:
+                            # Se a combinacao for valida, adiciona o pai de tal producao na celula mestre
                             if list(corpo) == producao:
-                                coluna.append(cabeca)
-                coluna = list(set(coluna))
-                linha.append(coluna)
+                                celula_mestre.add(cabeca)
+                # adiciona a celula mestre na linha atual
+                linha.append(celula_mestre)
             self._tabela_CYK.append(linha)
 
     def __gera_arvores(self, linha_raiz, coluna_raiz):
@@ -369,13 +392,13 @@ class Gramatica():
         arvores = []
         if linha_raiz == len(tabela) - 2:
             for raiz in tabela[linha_raiz][coluna_raiz]:
-                teste = ArvoreDerivacao(tabela[linha_raiz+1][coluna_raiz])
+                teste = ArvoreDerivacao(tabela[linha_raiz + 1][coluna_raiz])
                 arvores.append(ArvoreDerivacao(raiz, teste, None))
         else:
             for raiz in tabela[linha_raiz][coluna_raiz]:
-                for r, s in zip(range(len(tabela)-2, linha_raiz, -1), range(linha_raiz+1, len(tabela)-1)):
+                for r, s in zip(range(len(tabela) - 2, linha_raiz, -1), range(linha_raiz + 1, len(tabela) - 1)):
                     sub_r = self.__gera_arvores(r, coluna_raiz)
-                    sub_s = self.__gera_arvores(s, coluna_raiz + (s-linha_raiz))
+                    sub_s = self.__gera_arvores(s, coluna_raiz + (s - linha_raiz))
                     for arv_r in sub_r:
                         for arv_s in sub_s:
                             if (raiz, (arv_r.conteudo, arv_s.conteudo)) in self._producoes:
@@ -389,11 +412,11 @@ class Gramatica():
                                         and arvore.conteudo == self._simbolo_inicial)
 
         arvores = list(filter(arvore_valida, arvores))
-        print("{} ÁRVORE(S) DE DERIVAÇÃO ENCONTRADAS\n".format(len(arvores)))
+        print("{} ÁRVORES DE DERIVAÇÃO ENCONTRADAS\n".format(len(arvores)))
 
         for arvore in arvores:
             arvore.print_arvore()
-            print("______________________________________\n")
+            print("----------------------------------------\n")
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), ondse:
@@ -401,12 +424,12 @@ class Gramatica():
         \nConjunto de símbolos terminais: \n\tT = {}
         \nRegras de produção: \nP = {}
         \nSímbolo inicial: {}'''.format(self._simbolo_inicial, self._variaveis, self._terminais,
-                    pprint.pformat(self._producoes), self._simbolo_inicial)
+                                        pprint.pformat(self._producoes), self._simbolo_inicial)
 
 
 if __name__ == '__main__':
     arquivo = input("Digite o caminho do arquivo: ")
     g = Gramatica(arquivo)
-    #print(g)
-    #g.remove_producoes_unitarias()
-    #print(g)
+    # print(g)
+    # g.remove_producoes_unitarias()
+    # print(g)
