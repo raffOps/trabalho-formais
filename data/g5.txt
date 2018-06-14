@@ -7,7 +7,6 @@
 #Variaveis
 [ A ]
 [ E ]
-[ R ]
 #Inicial
 [ A ]
 #Regras

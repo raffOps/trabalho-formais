@@ -3,6 +3,7 @@ from leitor import Leitor
 from itertools import combinations
 from arvore_derivacao import ArvoreDerivacao
 
+
 class Gramatica():
     def __init__(self, arquivo_gramatica):
         with open(arquivo_gramatica, mode='r', encoding="utf-8") as arquivo:
@@ -38,58 +39,44 @@ class Gramatica():
         Objetivo: simplificar um gramatica livre de contexto
         :return:
         """
-        #print("remove_producoes_vazias\n")
-        self.__remove_producoes_vazias()
-        print("REMOCAO DE PRODUCOES VAZIAS")
-        print(self)
-        print("######################################\n\n")
-        #print("#######################")
-        #print("\n\nremove_producoes_unitarais\n")
-        self.__remove_producoes_unitarias()
-        print("REMOCAO DE PRODUCOES UNITARIAS")
-        print(self)
-        print("######################################\n\n")
-        self.__exclusao_simbolos_inuteis()
-        print("REMOCAO DE SIMBOLOS INUTEIS")
-        print(self)
-        print("######################################\n\n")
-        #print(self)
-        #print("\n\nremove_variaveis_nao_geradoras\n")
-        #self.__remove_variaveis_nao_geradoras()
-        #print(self)
+        self.remove_producoes_vazias()
+        self.remove_producoes_unitarias()
+        self.exclusao_simbolos_inuteis()
 
-    def __remove_producoes_vazias(self):
+    def remove_producoes_vazias(self):
         """
         Objetivo: Dado um conjunto de producoes de uma glc, remove as producoes vazias diretas e indiretas
         Exemplo: Considere "V" o simbolo de vazio e "T" o simbolo de terminal,
-         {(A, ("V",)), (B, ("V",)), (C, ("V",)), (D, ("A","B","C","T"))} ->
+         {(A, ("V",)), (B, ("V",)), (C, ("V",)), (D, ("A","B","C","T"))} :
             {(D, ("A","B","C","T")), (D, ("A","B","T")), (D, ("A","C","T")), (D, ("B","C","T")),
             (D, ("A", "T")), (D, ("B","T")), (D, ("C","T")), (D, ("T",))}
 
         :return:
         """
         self.__remove_producoes_vazias_indiretas(self.__pop_producoes_vazias_diretas())
-        self._producoes.add((self._simbolo_inicial, ("V",))) #inclusao da palavra vazia
+        self._producoes.add((self._simbolo_inicial, ("V",)))  # inclusao da palavra vazia
 
     def __pop_producoes_vazias_diretas(self):
         """
         Objetivo: Remove producoes diretas de producoes vazias e retorna as cabecas destas
-        Exemplo: {(A, ("V",)), (B, ("V",)), (C, ("V",)), (D, ("A","B","C","T"))} ->
-                    {(D, ("A","B","C","T"))}
+        Exemplo: {(A, ("V",)), (B, ("V",)), (C, ("V",)), (D, ("A","B","C","T"))} :
+                    {(D, ("A","B","C","T"))}, ["A", "B", "C"]
         :return: lista de cabecas das producoes excluidas
         :rtype: list
         """
         prod_vazias_dir = set()
+        vars_com_producoes_vazias = set()
         for producao in self._producoes:
             if "V" in producao[1]:
                 prod_vazias_dir.add(producao)
+                vars_com_producoes_vazias.add(producao[0])
         self._producoes.difference_update(prod_vazias_dir)
-        return [producao[0] for producao in list(prod_vazias_dir)]
+        return vars_com_producoes_vazias
 
     def __remove_producoes_vazias_indiretas(self, vars_com_prod_vazias_dir):
         """
         Objetivo: Remove producoes indiretas de producoes vazias
-        Exemplo: {(D, ("A","B","C","T"))} , ["A","B","C"] ->
+        Exemplo: {(D, ("A","B","C","T"))} , ["A","B","C"] :
                     {(D, ("A","B","C","T")), (D, ("A","B","T")), (D, ("A","C","T")), (D, ("B","C","T")),
                     (D, ("A", "T")), (D, ("B","T")), (D, ("C","T")), (D, ("T",))}
         :param vars_com_prod_vazias_dir: lista de cabecas das producoes com producoes vazias diretas
@@ -99,7 +86,7 @@ class Gramatica():
         for producao in self._producoes:
             combinacoes = self.__get_combinacoes_de_variaveis_com_producao_vazia(producao[1], vars_com_prod_vazias_dir)
             for combinacao in combinacoes:
-                if len(combinacao) != len(producao[1]):
+                if len(combinacao) != len(producao[1]): # evita insercao de producao vazia
                     novas_producoes.append((producao[0], tuple(var for var in producao[1] if var not in combinacao)))
         self._producoes.update(novas_producoes)
 
@@ -107,16 +94,18 @@ class Gramatica():
         """
         Objetivo: Dado o corpo de uma producao e lista da variaveis que produzem vazio diretamente, retorna
                     a combinacao da intersecao destes
-        Exemplo: ("A","B","C,"D"), ["A", "B", "C"] -> (("A",), ("B",), ("B",), ("A", "B"), ("A", "C"),\
+        Exemplo: ("A","B","C,"D"), ["A", "B", "C"] : (("A",), ("B",), ("B",), ("A", "B"), ("A", "C"),
                                                         ("C", "B"), ("A", "B", "C"))
-        :param corpo_da_producao: tuple
-        :param vars_com_producoes_vazias_dir: list
+        :param corpo_da_producao: o corpo de uma producao qualquer da gramatica
+        :type corpo_da_producao: tuple
+        :param vars_com_producoes_vazias_dir: lista das variaveis que produzem vazio diretamente
+        :type vars_com_producoes_vazias_dir: tuple
         :return: combinacao da intersecao entre corpo_da_producao e vars_com_producoes_vazias_dir
         :rtype: tuple
         """
         vars_com_prod_vazias_dir_nesse_corpo = set(corpo_da_producao).intersection(vars_com_producoes_vazias_dir)
         combinacoes = []
-        for tamanho in range(len(vars_com_prod_vazias_dir_nesse_corpo)+1):
+        for tamanho in range(len(vars_com_prod_vazias_dir_nesse_corpo) + 1):
             combinacoes.extend(tuple(combinations(vars_com_prod_vazias_dir_nesse_corpo, tamanho)))
         return tuple(combinacoes[1:])
 
@@ -132,7 +121,7 @@ class Gramatica():
                 producoes_terminais.add(producao)
         return producoes_terminais
 
-    def __remove_producoes_unitarias(self):
+    def remove_producoes_unitarias(self):
         fechos = {variavel: set() for variavel in self._variaveis}
 
         for variavel in self._variaveis:
@@ -168,66 +157,11 @@ class Gramatica():
 
         self._producoes = p1
 
-    def chonskfy(self):
-        lista_vars = "A B C D E F G H I J L M N O P Q R S T U V X W Y Z".split()
-        combinacaoes = combinations(lista_vars, 2)
-        lista_vars.extend([''.join(combinacao) for combinacao in combinacaoes])
-
-        vars_disponiveis = [vars for vars in lista_vars
-                            if vars not in self._variaveis]
-
-        vars_disponiveis = self.__remove_prods_que_misturam_vars_com_term(vars_disponiveis)
-        self.__remove_producoes_maiorq2(vars_disponiveis)
-
-    def __remove_prods_que_misturam_vars_com_term(self, variaveis_disponiveis):
-
-        producoes = list(self._producoes)
-        dict_vars_novas = dict()
-
-        for producao in range(len(producoes)):
-            tamanho_corpo = len(producoes[producao][1])
-            if tamanho_corpo > 1:
-                for item_corpo in range(tamanho_corpo):
-                    if producoes[producao][1][item_corpo] in self._terminais:
-                        producao_substituta = list(producoes[producao][1])
-                        nova_variavel = dict_vars_novas.setdefault(producao_substituta[item_corpo],
-                                                                  variaveis_disponiveis[0])
-                        self._variaveis.update(nova_variavel)
-                        producao_substituta[item_corpo] = nova_variavel
-                        producoes.append((nova_variavel, producoes[producao][1][item_corpo]))
-                        producoes[producao] = (producoes[producao][0], tuple(producao_substituta))
-                        if nova_variavel == variaveis_disponiveis[0]:
-                            variaveis_disponiveis.pop(0)
-
-        self._producoes = set(producoes)
-        return variaveis_disponiveis
-
-    def __remove_producoes_maiorq2(self, vars_disponiveis):
-        producoes = list(self._producoes)
-        for producao in producoes:
-            if len(producao[1]) > 2:
-                novas_producoes = self.__separa_producao(producao, vars_disponiveis)
-                self._producoes.remove(producao)
-                self._producoes.update(novas_producoes)
-
-    def __separa_producao(self, producao, vars_disponiveis):
-        producao = [producao[0], list(producao[1])]
-        tamanho_producao = len(producao[1])
-        novas_producoes = []
-        vars_novas = []
-        while tamanho_producao > 2:
-            vars_novas.clear()
-            for index in range(0, tamanho_producao-1, 2):
-                novas_producoes.append((vars_disponiveis[0], tuple(producao[1][index:index+2])))
-                vars_novas.append(vars_disponiveis[0])
-                vars_disponiveis.pop(0)
-            if tamanho_producao % 2 == 1:
-                vars_novas.append(producao[1][-1])
-            self._variaveis.update(vars_novas)
-            producao = [producao[0], vars_novas.copy()]
-            tamanho_producao = len(producao[1])
-        novas_producoes.append((producao[0], tuple(vars_novas)))
-        return novas_producoes
+    def exclusao_simbolos_inuteis(self):
+        """Comentar
+        """
+        self.__remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo()
+        self.__remove_simbolos_nao_atingiveis()
 
     def __remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo(self):
         """Comentar
@@ -260,8 +194,6 @@ class Gramatica():
                 tamanho_antigo = tamanho_novo
 
         self.variaveis.intersection_update(variaveis_terminais)
-        print(self.variaveis)
-
         self.__remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
         terminais_absolutos.clear()
 
@@ -292,11 +224,112 @@ class Gramatica():
 
         self.__remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
 
-    def __exclusao_simbolos_inuteis(self):
-        """Comentar
+    def chonskfy(self):
         """
-        self.__remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo()
-        self.__remove_simbolos_nao_atingiveis()
+        Objetivo: converte uma gramatica qualquer para o forma normal de chonsky
+        :return:
+        """
+        # Criacao da lista de variaveis disponiveis
+        lista_vars = "A B C D E F G H I J L M N O P Q R S T U V X W Y Z".split()
+        # adiciona a combinacao 2 a 2 dos termos da lista na lista
+        lista_vars.extend([b+c for c in lista_vars for b in lista_vars])
+
+        # Retira as variaveis jah utilizadas
+        vars_disponiveis = [vars for vars in lista_vars if vars not in self._variaveis]
+
+        vars_disponiveis = self.__somente_vars_em_producoes_maioresq2(vars_disponiveis)
+        self.__remove_producoes_maioresq2(vars_disponiveis)
+
+    def __somente_vars_em_producoes_maioresq2(self, variaveis_disponiveis):
+        """
+        Objetivo: Garantir que há somente variáveis do lado direito das produções de comprimento ≥ 2
+        Exemplo:  ("A", ("a", "B")) : ("A",(<variavel_livre_disponivel>, "B")), (<variavel_livre_disponivel>, ("a",))
+        """
+
+        producoes = list(self._producoes)
+        dict_vars_novas = dict()
+
+        for producao in range(len(producoes)):
+
+            #tamanho da corpo de cada producao
+            tamanho_corpo = len(producoes[producao][1])
+
+            # Se houver terminais em producoes maiores que 2, troca por uma nova variavel
+            if tamanho_corpo > 1:
+                for item_corpo in range(tamanho_corpo):
+                    if producoes[producao][1][item_corpo] in self._terminais:
+                        #copia da producao
+                        producao_substituta = list(producoes[producao][1])
+                        # Verifica se ja existe uma variavel que produza o terminal. Se sim retorna a variavel, se nao
+                        #    pega uma variavel nova e insere no dicionario
+                        nova_variavel = dict_vars_novas.setdefault(producao_substituta[item_corpo],
+                                                                   variaveis_disponiveis[0])
+                        # troca terminal por uma variavel
+                        producao_substituta[item_corpo] = nova_variavel
+
+                        # adiciona a variavel novas as variaveis da gramatica
+                        self._variaveis.update(nova_variavel)
+
+                        # Atualiza as producoes
+                        producoes.append((nova_variavel, producoes[producao][1][item_corpo]))
+                        producoes[producao] = (producoes[producao][0], tuple(producao_substituta))
+
+                        # Retira variaveis jah utilizadas das lista de vars disponiveis
+                        if nova_variavel == variaveis_disponiveis[0]:
+                            variaveis_disponiveis.pop(0)
+
+        self._producoes = set(producoes)
+        return variaveis_disponiveis
+
+    def __remove_producoes_maioresq2(self, vars_disponiveis):
+        """
+        Objetivo: Garantir que há exatamente duas variáveis no lado direito das produções de uma gramatica
+        :param vars_disponiveis: lista das variaveis que podem ser usadas para criar producoes novas
+        :type vars_disponiveis: list
+        :return:
+        """
+        producoes = list(self._producoes)
+        for producao in producoes:
+        # Atualiza as producoes para que elas sejam de tamanho 2 no maximo
+            if len(producao[1]) > 2:
+                novas_producoes = self.__separa_producao(producao, vars_disponiveis)
+                self._producoes.remove(producao)
+                self._producoes.update(novas_producoes)
+
+    def __separa_producao(self, producao, vars_disponiveis):
+        """
+        Objetivo: Garantir que há exatamente duas variáveis no lado direito de uma producao
+        Exemplo ("A", ("B","C", "D")), ["E"] :  ("A", ("E", "D")), ("E",("B","C"))
+        :param vars_disponiveis: lista das variaveis que podem ser usadas para criar producoes novas
+        :type vars_disponiveis: list
+        :param producao: um producao da gramatica
+        :type producao: tuple
+        :return:
+        """
+        producao = [producao[0], list(producao[1])]
+        tamanho_producao = len(producao[1])
+        novas_producoes = []
+        vars_novas = []
+
+        # Vai reduzindo o tamanho da producao enquanto ela for maior que 2
+        while tamanho_producao > 2:
+            vars_novas.clear()
+            # Agrupa de 2 em 2 os simbolos que estao na producao junto com as suas novas cabecas
+            #   e adiciona nas novas producoes da gramatica
+            for index in range(0, tamanho_producao - 1, 2):
+                novas_producoes.append((vars_disponiveis[0], tuple(producao[1][index:index + 2])))
+                vars_novas.append(vars_disponiveis[0])
+                vars_disponiveis.pop(0)
+            if tamanho_producao % 2 == 1:
+                vars_novas.append(producao[1][-1])
+            # adiciona nas variaveis da gramatica as gramatica as novas vars utilizadas como cabecas no agrupamento
+            self._variaveis.update(vars_novas)
+            # atualiza a producao com as novas variaveis no corpo
+            producao = [producao[0], vars_novas.copy()]
+
+            tamanho_producao = len(producao[1])
+        novas_producoes.append((producao[0], tuple(vars_novas)))
+        return novas_producoes
 
     def reconhece_palavra(self, palavra):
         self.__cria_tabela(palavra)
@@ -305,7 +338,7 @@ class Gramatica():
     def __cria_tabela(self, palavra):
         self.__cyk_primeira_etapa(palavra)
         self.__cyk_segunda_etapa(len(palavra))
-        pprint.pprint(self._tabela_CYK)
+        #pprint.pprint(self._tabela_CYK)
 
     def __cyk_primeira_etapa(self, palavra):
         self._tabela_CYK = []
@@ -313,8 +346,6 @@ class Gramatica():
         self._tabela_CYK.append([])
         for terminal in self._tabela_CYK[0]:
             self._tabela_CYK[1].append([cabeca for cabeca, corpo in self._producoes if ''.join(corpo) == terminal])
-
-
 
     def __cyk_segunda_etapa(self, tamanho_palavra):
         for s in range(2, tamanho_palavra + 1):
@@ -332,58 +363,10 @@ class Gramatica():
                 coluna = list(set(coluna))
                 linha.append(coluna)
             self._tabela_CYK.append(linha)
-        #self._tabela_CYK = self._tabela_CYK[::-1]
-        #print(self._tabela_CYK[0][0])
-
-    def limpa_tabela(self, tamanho_palavra):
-
-        if len(self._tabela_CYK[0]) > 1:
-            #self._tabela_CYK = self._tabela_CYK[::-1]
-            self._tabela_CYK[-1][0] = ["S"]
-            for s in range(tamanho_palavra, 1, -1):
-                for r in range(tamanho_palavra - s + 1):
-                    #print("linha {}, coluna {}".format(s,r))
-                    #print(self._tabela_CYK[s][r])
-                    #print("~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                    #print(self._tabela_CYK[s][r])
-                    print("linha {}, coluna {}".format(s, r))
-                    #print("########################")
-                    for k in range(1, s):
-                        tuplas_validas = set()
-                        elementos_b = self._tabela_CYK[k][r]
-                        elementos_c = self._tabela_CYK[s - k][r + k]
-                        #print(elementos_b)
-                        #print("______________________")
-                        #print(elementos_c)
-                        #print("########################")
-                        tuplas = set([(b, c) for c in elementos_c for b in elementos_b])
-                        #print(tuplas)
-                        for tupla in tuplas:
-                            for cabeca, corpo in self._producoes:
-                                #print(self._tabela_CYK[s][r])
-                                #print("linha {}, coluna {}".format(s, r))
-                                #print("########################")
-                                if list(cabeca) == self._tabela_CYK[s][r] and tupla == corpo:
-                                    tuplas_validas.add(tupla)
-                        self._tabela_CYK[k][r] = set()
-                        self._tabela_CYK[s - k][r + k] = set()
-                        for tupla in tuplas_validas:
-                            self._tabela_CYK[k][r].add(tupla[0])
-                            self._tabela_CYK[s - k][r + k].add(tupla[1])
-                        self._tabela_CYK[k][r] = list(self._tabela_CYK[k][r])
-                        self._tabela_CYK[s - k][r + k] = list(self._tabela_CYK[s - k][r + k])
-
-                        print(self._tabela_CYK[k][r])
-                        print(self._tabela_CYK[s - k][r + k])
-                        print("########################")
-        self._tabela_CYK = self._tabela_CYK[::-1]
-
 
     def __gera_arvores(self, linha_raiz, coluna_raiz):
         tabela = self._tabela_CYK
         arvores = []
-
-
         if linha_raiz == len(tabela) - 2:
             for raiz in tabela[linha_raiz][coluna_raiz]:
                 teste = ArvoreDerivacao(tabela[linha_raiz+1][coluna_raiz])
@@ -406,7 +389,6 @@ class Gramatica():
         for arvore in arvores:
             if arvore.palavra_gerada() == palavra and arvore.conteudo == self._simbolo_inicial:
                 arvore.print_arvore()
-
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), ondse:

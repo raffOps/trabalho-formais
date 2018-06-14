@@ -5,7 +5,6 @@ from gramatica import *
 g = Gramatica(arquivo_gramatica="data/g6.txt")
 g.simplifica_gramatica()
 g.chonskfy()
-#print("FORMA DE CHONSKY")
 palavra = "abba"
 print(g.reconhece_palavra(palavra))
 g.arvores_de_derivacao(palavra)
