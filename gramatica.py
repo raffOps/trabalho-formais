@@ -1,6 +1,7 @@
 import pprint
 from leitor import Leitor
 from itertools import combinations
+from arvore_derivacao import ArvoreDerivacao
 
 class Gramatica():
     def __init__(self, arquivo_gramatica):
@@ -299,22 +300,21 @@ class Gramatica():
 
     def reconhece_palavra(self, palavra):
         self.__cria_tabela(palavra)
-        if self._simbolo_inicial in self._tabela_CYK[0][0]:
-            return True
-        else:
-            return False
+        return self._simbolo_inicial in self._tabela_CYK[-1][0]
 
     def __cria_tabela(self, palavra):
-
         self.__cyk_primeira_etapa(palavra)
         self.__cyk_segunda_etapa(len(palavra))
+        pprint.pprint(self._tabela_CYK)
 
     def __cyk_primeira_etapa(self, palavra):
         self._tabela_CYK = []
         self._tabela_CYK.append(list(palavra))
         self._tabela_CYK.append([])
         for terminal in self._tabela_CYK[0]:
-            self._tabela_CYK[1].append([cabeca for cabeca, corpo in self._producoes if corpo == tuple(terminal)])
+            self._tabela_CYK[1].append([cabeca for cabeca, corpo in self._producoes if ''.join(corpo) == terminal])
+
+
 
     def __cyk_segunda_etapa(self, tamanho_palavra):
         for s in range(2, tamanho_palavra + 1):
@@ -377,6 +377,36 @@ class Gramatica():
                         print(self._tabela_CYK[s - k][r + k])
                         print("########################")
         self._tabela_CYK = self._tabela_CYK[::-1]
+
+
+    def __gera_arvores(self, linha_raiz, coluna_raiz):
+        tabela = self._tabela_CYK
+        arvores = []
+
+
+        if linha_raiz == len(tabela) - 2:
+            for raiz in tabela[linha_raiz][coluna_raiz]:
+                teste = ArvoreDerivacao(tabela[linha_raiz+1][coluna_raiz])
+                arvores.append(ArvoreDerivacao(raiz, teste, None))
+        else:
+            for raiz in tabela[linha_raiz][coluna_raiz]:
+                for r, s in zip(range(len(tabela)-2, linha_raiz, -1), range(linha_raiz+1, len(tabela)-1)):
+                    sub_r = self.__gera_arvores(r, coluna_raiz)
+                    sub_s = self.__gera_arvores(s, coluna_raiz + (s-linha_raiz))
+                    for arv_r in sub_r:
+                        for arv_s in sub_s:
+                            if (raiz, (arv_r.conteudo, arv_s.conteudo)) in self._producoes:
+                                arvores.append(ArvoreDerivacao(raiz, arv_r, arv_s))
+        return arvores
+
+    def arvores_de_derivacao(self, palavra):
+        self._tabela_CYK.reverse()
+        pprint.pprint(self._tabela_CYK)
+        arvores = self.__gera_arvores(0, 0)
+        for arvore in arvores:
+            if arvore.palavra_gerada() == palavra and arvore.conteudo == self._simbolo_inicial:
+                arvore.print_arvore()
+
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), ondse:
