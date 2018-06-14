@@ -1,16 +1,34 @@
 from gramatica import *
 
-
-#arquivo = input("Digite o nome do arquivo: ")
-g = Gramatica(arquivo_gramatica="data/g6.txt")
-g.simplifica_gramatica()
+arquivo = input("Digite o nome do arquivo: ")
+g = Gramatica(arquivo_gramatica="data/" + arquivo)
+g.remove_producoes_vazias()
+print("\nREMOVE PRODUÇÕES VAZIS: ")
+print(g)
+print("---------------------------------------")
+g.remove_producoes_unitarias()
+print("\nREMOVE PRODUÇÕES UNITÁRIAS: ")
+print(g)
+print("---------------------------------------")
+g.remove_simbolos_inuteis()
+print("\nREMOVE PRODUÇÕES INÚTEIS: ")
+print(g)
+print("---------------------------------------")
 g.chonskfy()
-palavra = "abba"
-print(g.reconhece_palavra(palavra))
-g.arvores_de_derivacao(palavra)
-#g.limpa_tabela(5)
+print("\nCONVERTE PARA A FORMA NORMAL DE CHONSKY: ")
+print(g)
+print("---------------------------------------")
 
-#print(g.tabela_CYK)
+while True:
+    palavra = input("\nDigite a palavra a ser reconhecida pela gramática: ")
+    palavra_reconhecida = g.reconhece_palavra(palavra)
+    pprint.pprint(g.tabela_CYK)
+    if palavra_reconhecida:
+        print("\nA palavra {} é reconhecida por essa gramática\n".format(palavra))
+        g.arvores_de_derivacao()
+    else:
+        print("\nA palavra {} não é reconhecida por essa gramática\n".format(palavra))
 
+    if str(input("\nReconhecer mais uma palavra? 1 para sim, qualquer outra tecla para nao: ")) != "1":
+        break
 
-#pprint.pprint(g.tabela_CYK)

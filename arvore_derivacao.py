@@ -4,13 +4,14 @@ class ArvoreDerivacao:
         self._conteudo = conteudo
         self._esquerda = esquerda
         self._direita = direita
+        self.children = [self._esquerda, self._direita]
 
     @property
     def conteudo(self):
         return self._conteudo
 
     def print_arvore(self, nivel=1):
-        print("{:>{espacos}}".format(self._conteudo, espacos=nivel))
+        print("Nível {espacos}: {:>{espacos}}".format(self._conteudo, espacos=nivel))
         if self._direita:
             self._direita.print_arvore(nivel + 1)
         if self._esquerda:

@@ -41,7 +41,7 @@ class Gramatica():
         """
         self.remove_producoes_vazias()
         self.remove_producoes_unitarias()
-        self.exclusao_simbolos_inuteis()
+        self.remove_simbolos_inuteis()
 
     def remove_producoes_vazias(self):
         """
@@ -157,7 +157,7 @@ class Gramatica():
 
         self._producoes = p1
 
-    def exclusao_simbolos_inuteis(self):
+    def remove_simbolos_inuteis(self):
         """Comentar
         """
         self.__remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo()
@@ -333,12 +333,12 @@ class Gramatica():
 
     def reconhece_palavra(self, palavra):
         self.__cria_tabela(palavra)
-        return self._simbolo_inicial in self._tabela_CYK[-1][0]
+        self._tabela_CYK = self._tabela_CYK[::-1]
+        return self._simbolo_inicial in self._tabela_CYK[0][0]
 
     def __cria_tabela(self, palavra):
         self.__cyk_primeira_etapa(palavra)
         self.__cyk_segunda_etapa(len(palavra))
-        #pprint.pprint(self._tabela_CYK)
 
     def __cyk_primeira_etapa(self, palavra):
         self._tabela_CYK = []
@@ -382,13 +382,18 @@ class Gramatica():
                                 arvores.append(ArvoreDerivacao(raiz, arv_r, arv_s))
         return arvores
 
-    def arvores_de_derivacao(self, palavra):
-        self._tabela_CYK.reverse()
-        pprint.pprint(self._tabela_CYK)
+    def arvores_de_derivacao(self):
         arvores = self.__gera_arvores(0, 0)
+
+        arvore_valida = (lambda arvore: arvore.palavra_gerada() == "".join(self.tabela_CYK[-1])
+                                        and arvore.conteudo == self._simbolo_inicial)
+
+        arvores = list(filter(arvore_valida, arvores))
+        print("{} ÁRVORE(S) DE DERIVAÇÃO ENCONTRADAS\n".format(len(arvores)))
+
         for arvore in arvores:
-            if arvore.palavra_gerada() == palavra and arvore.conteudo == self._simbolo_inicial:
-                arvore.print_arvore()
+            arvore.print_arvore()
+            print("______________________________________\n")
 
     def __str__(self):
         return '''\nG = (V, T, P, {}), ondse:
