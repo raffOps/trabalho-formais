@@ -278,6 +278,8 @@ class Gramatica():
                             variaveis.add(item)
                         elif item in self.terminais:
                             terminais.add(item)
+            len_terminais_novo = len(terminais)
+            len_variaveis_novo = len(variaveis)
             if len_terminais_antigo == len_terminais_novo and len_variaveis_antigo == len_variaveis_novo:
                 break
             else:
