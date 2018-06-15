@@ -265,7 +265,7 @@ class Gramatica():
         """
         terminais = set()
         variaveis = set()
-        variaveis.add(self.variaveis)
+        variaveis.add(self.simbolo_inicial)
         len_terminais_antigo = 0
         len_terminais_novo = 0
         len_variaveis_antigo = 0
