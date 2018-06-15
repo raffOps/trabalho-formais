@@ -11,8 +11,10 @@ class Leitor:
         """
         Lê uma linha do arquivo e lida com os comentarios, retornado apenas a parte
         significativa da linha.
-        :param arquivo: file
-        :return: string
+        :param arquivo: arquivo txt onde esta a gramatica a ser lida
+        :type arquivo: file
+        :return: a linha com os dados uteis
+        :rtype: str
         """
         linha = arquivo.readline()
         posicao = linha.find("#")
@@ -28,8 +30,9 @@ class Leitor:
         """
         Separa numa lista cada conjunto de caracteres na linha.
         Exemplo: [ S ] > [ NP ] [ VP ] -> ['', ' S ', ' ', ' ', ' NP ', ' ', ' VP ', '\n']
-        :param linha: string
-        :return: lista de string
+        :param linha: str
+        :return: lista de strings, contendo variaveis e/ou terminais
+        :rtype: list
         """
         # Nas 3 proximas linhas eu troco os caracteres inuteis para "|" com o objetivo de facilitar o split
         # Tentei usar o metodo re.split() mas ela retorna o resultado errado
@@ -43,10 +46,12 @@ class Leitor:
         """
         Pega os simbolos terminais da gramatica
         Exemplo: gramatica_exemplo2.txt -> ['runs', 'barks', 'eats', ... , 'with', 'at']
-        :param arquivo: file
-        :return: lista de strings
+        :param arquivo: arquivo txt onde esta a gramatica a ser lida
+        :type arquivo: file
+        :return: conjunto contendo os terminais da gramatica
+        :rtype: set
         """
-        self.__le_linha(arquivo)  # esse readline eh pra pular a primeira linha do o arquivo, onde ta escrito "#Terminais"
+        self.__le_linha(arquivo)#esse readline eh pra pular a primeira linha do o arquivo, onde ta escrito "#Terminais"
         terminais = set()
         while True:
             linha = self.__le_linha(arquivo)
@@ -60,8 +65,10 @@ class Leitor:
         """
         Formata a lista retornada da funcao splita_linha()
         Exemplo: ['', ' S ', ' ', ' ', ' NP ', ' ', ' VP ', '\n'] -> ['S', ['NP', 'VP']]
-        :param linha: lista de strings
-        :return: lista de strings
+        :param linha: lista que contem os elementos de uma producao
+        :type linha: list
+        :return: a producao extraida da lista
+        :rytpe: tuple
         """
         cabeca = linha[1][1:-1]  # A cabeca da producao sempre vai estar no indice 1 da lista. Esse slice [1:-1] eh
                                  #    para tirar os espacos em branco que cercam ela
@@ -76,8 +83,10 @@ class Leitor:
         """
         Pega as regras de producao da gramatica
         Exemplo: gramatica_exemplo2.txt -> [['S', ['NP', 'VP']], ... , ['N', ['dog']], ['N', ['cat']]
-        :param arquivo: file
-        :return: lista de lista de strings
+        :param arquivo: arquivo txt onde esta a gramatica a ser lida
+        :type arquivo: file
+        :return: conjunto contendo as producoes da gramatica
+        :rtype: set
         """
         self.__le_linha(arquivo)
         producoes = set()
@@ -95,8 +104,11 @@ class Leitor:
         """
         Pega os simbolos variaveis da gramatica
         Exemplo:  gramatica_exemplo2.txt -> ['VB', 'NP', 'DT', 'VP', 'S', 'PP', 'P']
-        :param arquivo: file
-        :return: lista de strings
+        :param arquivo: arquivo txt onde esta a gramatica a ser lida
+        :type arquivo: file
+        :return: lista das variaveis da gramatica
+        rtype: list
+
         """
         variaveis = set()
         while True:
