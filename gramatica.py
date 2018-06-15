@@ -411,7 +411,7 @@ class Gramatica():
 
     def __cria_tabela(self, palavra):
         self.__cyk_primeira_etapa(palavra)
-        self.__cyk_segunda_etapa(len(palavra))
+        self.__cyk_segunda_etapa(len(palavra.split(" ")))
 
     def __cyk_primeira_etapa(self, palavra):
         """
@@ -421,7 +421,7 @@ class Gramatica():
         :return:
         """
         self._tabela_CYK = []
-        self._tabela_CYK.append(list(palavra))
+        self._tabela_CYK.append(palavra.split(" "))
         self._tabela_CYK.append([])
         for terminal in self._tabela_CYK[0]:
             self._tabela_CYK[1].append(set([cabeca for cabeca, corpo in self._producoes if ''.join(corpo) == terminal]))

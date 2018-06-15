@@ -21,7 +21,7 @@ print(g)
 print("---------------------------------------")
 
 while True:
-    palavra = input("\nDigite a palavra a ser reconhecida pela gramática: ")
+    palavra = input("\nDigite a palavra a ser reconhecida pela gramática (com os terminais separados por espaços): ")
     palavra_reconhecida = g.reconhece_palavra(palavra)
     pprint.pprint(g.tabela_CYK)
     if palavra_reconhecida:
@@ -32,4 +32,3 @@ while True:
 
     if str(input("\nReconhecer mais uma palavra? 1 para sim, qualquer outra tecla para nao: ")) != "1":
         break
-
