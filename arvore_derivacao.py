@@ -11,6 +11,12 @@ class ArvoreDerivacao:
         return self._conteudo
 
     def print_arvore(self, nivel=1):
+        """
+        Objetivo: imprimir toda a árvore, cuja raíz tem o nivel fornecido.
+        :param nivel:
+        :type nivel: int
+        :rtype: None
+        """
         print("Nível {espacos}: {:>{espacos}}".format(self._conteudo, espacos=nivel))
         if self._direita:
             self._direita.print_arvore(nivel + 1)
@@ -18,7 +24,11 @@ class ArvoreDerivacao:
             self._esquerda.print_arvore(nivel + 1)
 
     def palavra_gerada(self):
-
+        """
+        Objetivo: Obter a palavra gerada pela árvore de derivação.
+        :return: Palavra derivada.
+        :rtype: str
+        """
         if not self._esquerda and not self._direita:
             return self._conteudo
 
