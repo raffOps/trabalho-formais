@@ -110,6 +110,14 @@ class Gramatica():
         return tuple(combinacoes[1:])
 
     def __encontra_producoes_terminais(self, variavel):
+        """
+        Objetivo: encontrar todas as produções terminais de uma variável.
+        :param variavel:
+        :type variavel: str
+        :return: produções encabeçadas por variavel que possuem terminais
+        :rtype: set
+        """
+
         possiveis_producoes = {producao for producao in self._producoes if producao[0] == variavel}
         producoes_terminais = set()
 
@@ -122,6 +130,10 @@ class Gramatica():
         return producoes_terminais
 
     def remove_producoes_unitarias(self):
+        """
+        Objetivo: remover as produções unitárias da gramática
+        :rtype: None
+        """
         fechos = {variavel: set() for variavel in self._variaveis}
 
         for variavel in self._variaveis:
@@ -388,6 +400,18 @@ class Gramatica():
             self._tabela_CYK.append(linha)
 
     def __gera_arvores(self, linha_raiz, coluna_raiz):
+        """
+        Objetivo: retornar todas as árvores de derivação cuja raíz está na
+        em self._tabela_CYK[linha_raiz][coluna_raiz]
+        :param linha_raiz:
+        :type linha_raiz: int
+        :param coluna_raiz:
+        :type coluna_raiz: int
+        :return: todas as arvores de derivação com raíz de índices linha_raiz,
+        coluna_raiz
+        :rtype: list
+        """
+
         tabela = self._tabela_CYK
         arvores = []
         if linha_raiz == len(tabela) - 2:
@@ -406,6 +430,12 @@ class Gramatica():
         return arvores
 
     def arvores_de_derivacao(self):
+        """
+        Objetivo: imprimir todas as árvores de derivação que geram a palavra
+        parseada
+        :rtype: None
+        """
+
         arvores = self.__gera_arvores(0, 0)
 
         arvore_valida = (lambda arvore: arvore.palavra_gerada() == "".join(self.tabela_CYK[-1])
