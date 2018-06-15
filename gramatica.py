@@ -170,13 +170,28 @@ class Gramatica():
         self._producoes = p1
 
     def remove_simbolos_inuteis(self):
-        """Comentar
+        """
+        Objetivo: Dada uma glc, remove as variáveis inuteis, suas produções
+        e as produções que as contém
+        Exemplo:
+        Dados os conjuntos de produções e variáveis
+        Variáveis: {S,A,B,C,D}
+        Produções: {S->AC|AA|b, A->aC|a, B->BC, C->c}
+        Remove as variáveis B e C e suas produções e as produções que as contém, resultando em:
+        Variáveis: {S,A,C}
+        Produções: {S->AC|AA|b, A->aC|a, C->c}
         """
         self.__remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo()
         self.__remove_simbolos_nao_atingiveis()
 
     def __remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo(self):
-        """Comentar
+        """
+        Objetivo: Dado um conjunto de produções, remove todas aquelas que tenham
+        variaveis nao terminais
+        Exemplo:
+        Produções: {S->AC|AA|b, A->aC|a, B->D, C->c}
+        Gera
+        Produções: {S->AC|AA|b, A->aC|a, C->c}
         """
         variaveis_e_terminais = self.terminais | self.variaveis
         novo_set_producoes = set()
@@ -186,8 +201,34 @@ class Gramatica():
 
         self.producoes.intersection_update(novo_set_producoes)
 
+    def __remove_producoes_com_variaveis_ou_terminais_nao_pertencentes_a_gramatica(self):
+        """Objetivo: Dado um conjunto de produções, variaveis e terminais, remove todas as produções
+        que que contenham variaveis ou terminais nao pertencentes a gramatica
+        Exemplo:
+        Variaveis: {A,S,C}
+        Terminais: {a,b,c}
+        Produções: {S->AC|AA|b, A->aC|a, B->D, C->c|d}
+        Gera
+        Produções: {S->AC|AA|b, A->aC|a, C->c}
+        """
+        variaveis_e_terminais = self.terminais | self.variaveis
+        novo_set_producoes = set()
+        for producao in self.producoes:
+            if(producao[0] in self.variaveis):
+                if all(item in variaveis_e_terminais for item in producao[0]):
+                    novo_set_producoes.add(producao)
+        self.producoes.intersection_update(novo_set_producoes)
+
     def __remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo(self):
-        """Comentar
+        """
+        Remove as variais que nao geram terminais direta ou indiretamente
+        Exemplo:
+        Dada uma gramatico que tenha
+        Variáveis: {S,A,B,C,D}
+        Produções: {S->AC|AA|b, A->aC|a, B->BC, C->c}
+        A gramatica é modificada e fica:
+        Variáveis: {S,A,C}
+        Produções: {S->AC|AA|b, A->aC|a, C->c}
         """
         variaveis_terminais = set()
         terminais_absolutos = set() | self.terminais
@@ -210,10 +251,21 @@ class Gramatica():
         terminais_absolutos.clear()
 
     def __remove_simbolos_nao_atingiveis(self):
-        """Comentar
+        """
+        Objetivo: Remover variaveis e terminais nao atingiveis e producoes que os contenham
+        Exemplo:
+        Dada uma gramatico que tenha
+        Variáveis: {S,A,C,D}
+        Terminais: {a,b,c,d}
+        Produções: {S->AC|AA|b, A->aC|a, C->c, D->a|d}
+        A gramatica é modificada e fica:
+        Variáveis: {S,A,C}
+        Terminais: {a,b,c}
+        Produções: {S->AC|AA|b, A->aC|a, C->c}
         """
         terminais = set()
-        variaveis = set() | self.variaveis
+        variaveis = set()
+        variaveis.add(self.variaveis)
         len_terminais_antigo = 0
         len_terminais_novo = 0
         len_variaveis_antigo = 0
