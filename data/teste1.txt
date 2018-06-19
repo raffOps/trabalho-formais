@@ -1,0 +1,21 @@
+#Terminais # teste 1 - simplificacao
+[ a ]
+[ b ]
+#Variaveis
+[ S ]
+[ A ]
+[ B ]
+[ C ]
+#Inicial
+[ S ]
+#Regras
+[ S ] > [ A ]
+[ S ] > [ A ] [ B ] [ a ]
+[ S ] > [ A ] [ b ] [ A ]
+[ A ] > [ A ] [ a ]
+[ A ] > [ V ]
+[ B ] > [ B ] [ b ]
+[ B ] > [ B ] [ C ]
+[ C ] > [ C ] [ B ]
+[ C ] > [ C ] [ A ]
+[ C ] > [ b ] [ B ]

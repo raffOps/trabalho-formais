@@ -84,13 +84,18 @@ class Gramatica():
         """
         novas_producoes = []
         for producao in self._producoes:
-            combinacoes = self.__get_combinacoes_de_variaveis_com_producao_vazia(producao[1], vars_com_prod_vazias_dir)
+            indice_vars_prod_vazias_ind = []
+            for index in range(len(producao[1])):
+                if producao[1][index] in vars_com_prod_vazias_dir:
+                    indice_vars_prod_vazias_ind.append(index)
+            combinacoes = self.__get_combinacoes_de_variaveis_com_producao_vazia(indice_vars_prod_vazias_ind)
             for combinacao in combinacoes:
                 if len(combinacao) != len(producao[1]):  # evita insercao de producao vazia
-                    novas_producoes.append((producao[0], tuple(var for var in producao[1] if var not in combinacao)))
+                    novas_producoes.append((producao[0], tuple(producao[1][var] for var in range(len(producao[1]))
+                                                               if var not in combinacao)))
         self._producoes.update(novas_producoes)
 
-    def __get_combinacoes_de_variaveis_com_producao_vazia(self, corpo_da_producao, vars_com_producoes_vazias_dir):
+    def __get_combinacoes_de_variaveis_com_producao_vazia(self, indice_vars_prod_vazais_ind):
         """
         Objetivo: Dado o corpo de uma producao e lista da variaveis que produzem vazio diretamente, retorna
                     a combinacao da intersecao destes
@@ -98,15 +103,15 @@ class Gramatica():
                                                         ("C", "B"), ("A", "B", "C"))
         :param corpo_da_producao: o corpo de uma producao qualquer da gramatica
         :type corpo_da_producao: tuple
-        :param vars_com_producoes_vazias_dir: lista das variaveis que produzem vazio diretamente
-        :type vars_com_producoes_vazias_dir: tuple
+        :param indice_vars_prod_vazais_ind: lista das variaveis que produzem vazio diretamente
+        :type indice_vars_prod_vazais_ind: list
         :return: combinacao da intersecao entre corpo_da_producao e vars_com_producoes_vazias_dir
         :rtype: tuple
         """
-        vars_com_prod_vazias_dir_nesse_corpo = set(corpo_da_producao).intersection(vars_com_producoes_vazias_dir)
+        #vars_com_prod_vazias_dir_nesse_corpo = set(corpo_da_producao).intersection(vars_com_producoes_vazias_dir)
         combinacoes = []
-        for tamanho in range(len(vars_com_prod_vazias_dir_nesse_corpo) + 1):
-            combinacoes.extend(tuple(combinations(vars_com_prod_vazias_dir_nesse_corpo, tamanho)))
+        for tamanho in range(len(indice_vars_prod_vazais_ind) + 1):
+            combinacoes.extend(tuple(combinations(indice_vars_prod_vazais_ind, tamanho)))
         return tuple(combinacoes[1:])
 
     def __encontra_producoes_terminais(self, variavel):
