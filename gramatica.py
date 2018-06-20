@@ -53,8 +53,11 @@ class Gramatica():
 
         :return:
         """
-        self.__remove_producoes_vazias_indiretas(self.__pop_producoes_vazias_diretas())
-        self._producoes.add((self._simbolo_inicial, ("V",)))  # inclusao da palavra vazia
+        vars_produzem_vazio_dir = self.__pop_producoes_vazias_diretas()
+        self.__remove_producoes_vazias_indiretas(vars_produzem_vazio_dir)
+        if self._simbolo_inicial in vars_produzem_vazio_dir:
+            self._producoes.add((self._simbolo_inicial, ("V",)))  # inclusao da palavra vazia se o simbolo inicial
+                                                                  # produz vazio
 
     def __pop_producoes_vazias_diretas(self):
         """
@@ -301,7 +304,7 @@ class Gramatica():
         :return:
         """
         # Criacao da lista de variaveis disponiveis
-        lista_vars = "A B C D E F G H I J L M N O P Q R S T U V X W Y Z".split()
+        lista_vars = "A B C D E F G H I J L M N O P Q R S T U X W Y Z".split()
         # adiciona a combinacao 2 a 2 dos termos da lista na lista
         lista_vars.extend([b + c for c in lista_vars for b in lista_vars])
 

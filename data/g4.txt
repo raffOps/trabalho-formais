@@ -6,13 +6,12 @@
 [ A ]
 [ B ]
 [ C ]
-[ D ]
 [ E ]
 #Inicial
 [ A ]
 #Regras
-[ A ] > [ B ] [ E ] [ a ] [ C ] [ D ]
+[ A ] > [ B ] [ E ] [ a ] [ C ] [ A ]
 [ B ] > [ C ]
 [ C ] > [ b ]
 [ E ] > [ V ]
-[ D ] > [ V ]
+[ A ] > [ V ]
