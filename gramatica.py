@@ -1,5 +1,6 @@
 import pprint
 from itertools import combinations
+
 from arvore_derivacao import ArvoreDerivacao
 from leitor import Leitor
 
@@ -104,8 +105,6 @@ class Gramatica():
                     a combinacao da intersecao destes
         Exemplo: ("A","B","C,"D"), ["A", "B", "C"] : (("A",), ("B",), ("B",), ("A", "B"), ("A", "C"),
                                                         ("C", "B"), ("A", "B", "C"))
-        :param corpo_da_producao: o corpo de uma producao qualquer da gramatica
-        :type corpo_da_producao: tuple
         :param indice_vars_prod_vazais_ind: lista das variaveis que produzem vazio diretamente
         :type indice_vars_prod_vazais_ind: list
         :return: combinacao da intersecao entre corpo_da_producao e vars_com_producoes_vazias_dir
@@ -223,7 +222,7 @@ class Gramatica():
         novo_set_producoes = set()
         for producao in self.producoes:
             if(producao[0] in self.variaveis):
-                if all(item in variaveis_e_terminais for item in producao[0]):
+                if all(item in variaveis_e_terminais for item in producao[1]):
                     novo_set_producoes.add(producao)
         self.producoes.intersection_update(novo_set_producoes)
 
@@ -275,9 +274,7 @@ class Gramatica():
         variaveis = set()
         variaveis.add(self.simbolo_inicial)
         len_terminais_antigo = 0
-        len_terminais_novo = 0
         len_variaveis_antigo = 0
-        len_variaveis_novo = 0
         while True:
             for producao in self.producoes:
                 if producao[0] in variaveis:
@@ -296,7 +293,7 @@ class Gramatica():
         self.variaveis.intersection_update(variaveis)
         self.terminais.intersection_update(terminais)
 
-        self.__remove_producoes_que_tenham_variaveis_nao_terminais_no_corpo()
+        self.__remove_producoes_com_variaveis_ou_terminais_nao_pertencentes_a_gramatica()
 
     def chonskfy(self):
         """
