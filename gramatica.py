@@ -88,15 +88,24 @@ class Gramatica():
         """
         novas_producoes = []
         for producao in self._producoes:
-            indice_vars_prod_vazias_ind = []
-            for index in range(len(producao[1])):
-                if producao[1][index] in vars_com_prod_vazias_dir:
-                    indice_vars_prod_vazias_ind.append(index)
+            indice_vars_prod_vazias_ind = [
+                index
+                for index in range(len(producao[1]))
+                if producao[1][index] in vars_com_prod_vazias_dir
+            ]
             combinacoes = self.__get_combinacoes_de_variaveis_com_producao_vazia(indice_vars_prod_vazias_ind)
-            for combinacao in combinacoes:
-                if len(combinacao) != len(producao[1]):  # evita insercao de producao vazia
-                    novas_producoes.append((producao[0], tuple(producao[1][var] for var in range(len(producao[1]))
-                                                               if var not in combinacao)))
+            novas_producoes.extend(
+                (
+                    producao[0],
+                    tuple(
+                        producao[1][var]
+                        for var in range(len(producao[1]))
+                        if var not in combinacao
+                    ),
+                )
+                for combinacao in combinacoes
+                if len(combinacao) != len(producao[1])
+            )
         self._producoes.update(novas_producoes)
 
     def __get_combinacoes_de_variaveis_com_producao_vazia(self, indice_vars_prod_vazais_ind):
@@ -144,32 +153,35 @@ class Gramatica():
         fechos = {variavel: set() for variavel in self._variaveis}
 
         for variavel in self._variaveis:
-            vars_unitarias = set()
-            for producao in self._producoes:
-                if producao[0] == variavel and len(producao[1]) == 1 and producao[1][0] in self._variaveis:
-                    vars_unitarias.add(producao[1][0])
+            vars_unitarias = {
+                producao[1][0]
+                for producao in self._producoes
+                if producao[0] == variavel
+                and len(producao[1]) == 1
+                and producao[1][0] in self._variaveis
+            }
             fechos[variavel] = vars_unitarias
 
         tamanhos = [len(fechos[variavel]) for variavel in fechos]
         tamanhos_novo = []
         while tamanhos != tamanhos_novo:
             for variavel in self._variaveis:
-                for cabeca in fechos:
-                    if variavel in fechos[cabeca]:
+                for cabeca, value in fechos.items():
+                    if variavel in value:
                         fechos[cabeca] = fechos[cabeca].union(fechos[variavel])
             tamanhos = tamanhos_novo
             tamanhos_novo = [len(fechos[variavel]) for variavel in fechos]
 
-        for cabeca in fechos:
-            if cabeca in fechos[cabeca]:
+        for cabeca, value_ in fechos.items():
+            if cabeca in value_:
                 fechos[cabeca].remove(cabeca)
 
         p1 = set()
         for variavel in self._variaveis:
             p1 = p1.union(self.__encontra_producoes_terminais(variavel))
 
-        for variavel in fechos:
-            for B in fechos[variavel]:
+        for variavel, value__ in fechos.items():
+            for B in value__:
                 producoes_terminais = self.__encontra_producoes_terminais(B)
                 producoes_terminais = {(variavel, prod[1]) for prod in producoes_terminais}
                 p1 = p1.union(producoes_terminais)
@@ -201,11 +213,11 @@ class Gramatica():
         Produções: {S->AC|AA|b, A->aC|a, C->c}
         """
         variaveis_e_terminais = self.terminais | self.variaveis
-        novo_set_producoes = set()
-        for producao in self.producoes:
-            if all(item in variaveis_e_terminais for item in producao[1]):
-                novo_set_producoes.add(producao)
-
+        novo_set_producoes = {
+            producao
+            for producao in self.producoes
+            if all(item in variaveis_e_terminais for item in producao[1])
+        }
         self.producoes.intersection_update(novo_set_producoes)
 
     def __remove_producoes_com_variaveis_ou_terminais_nao_pertencentes_a_gramatica(self):
@@ -219,11 +231,12 @@ class Gramatica():
         Produções: {S->AC|AA|b, A->aC|a, C->c}
         """
         variaveis_e_terminais = self.terminais | self.variaveis
-        novo_set_producoes = set()
-        for producao in self.producoes:
-            if(producao[0] in self.variaveis):
-                if all(item in variaveis_e_terminais for item in producao[1]):
-                    novo_set_producoes.add(producao)
+        novo_set_producoes = {
+            producao
+            for producao in self.producoes
+            if (producao[0] in self.variaveis)
+            and all(item in variaveis_e_terminais for item in producao[1])
+        }
         self.producoes.intersection_update(novo_set_producoes)
 
     def __remove_variaveis_nao_terminais_e_producoes_com_elas_no_corpo(self):
@@ -271,8 +284,7 @@ class Gramatica():
         Produções: {S->AC|AA|b, A->aC|a, C->c}
         """
         terminais = set()
-        variaveis = set()
-        variaveis.add(self.simbolo_inicial)
+        variaveis = {self.simbolo_inicial}
         len_terminais_antigo = 0
         len_variaveis_antigo = 0
         while True:
@@ -287,9 +299,8 @@ class Gramatica():
             len_variaveis_novo = len(variaveis)
             if len_terminais_antigo == len_terminais_novo and len_variaveis_antigo == len_variaveis_novo:
                 break
-            else:
-                len_terminais_antigo = len_terminais_novo
-                len_variaveis_antigo = len_variaveis_novo
+            len_terminais_antigo = len_terminais_novo
+            len_variaveis_antigo = len_variaveis_novo
         self.variaveis.intersection_update(variaveis)
         self.terminais.intersection_update(terminais)
 
@@ -318,7 +329,7 @@ class Gramatica():
         """
 
         producoes = list(self._producoes)
-        dict_vars_novas = dict()
+        dict_vars_novas = {}
 
         for producao in range(len(producoes)):
 
@@ -425,11 +436,15 @@ class Gramatica():
         :type palavra: str
         :return:
         """
-        self._tabela_CYK = []
-        self._tabela_CYK.append(palavra.split(" "))
-        self._tabela_CYK.append([])
+        self._tabela_CYK = [palavra.split(" "), []]
         for terminal in self._tabela_CYK[0]:
-            self._tabela_CYK[1].append(set([cabeca for cabeca, corpo in self._producoes if ''.join(corpo) == terminal]))
+            self._tabela_CYK[1].append(
+                {
+                    cabeca
+                    for cabeca, corpo in self._producoes
+                    if ''.join(corpo) == terminal
+                }
+            )
 
     def __cyk_segunda_etapa(self, tamanho_palavra):
         """
@@ -442,7 +457,7 @@ class Gramatica():
         for s in range(2, tamanho_palavra + 1):
             linha = []
             # Percorre as colunas da tabela
-            for r in range(0, tamanho_palavra - s + 1):
+            for r in range(tamanho_palavra - s + 1):
                 celula_mestre = set()
                 for k in range(1, s):
                     # Percorre em ordens opostas as celulas abaixo e na diagonal da celula mestre
@@ -483,9 +498,12 @@ class Gramatica():
                     sub_r = self.__gera_arvores(r, coluna_raiz)
                     sub_s = self.__gera_arvores(s, coluna_raiz + (s - linha_raiz))
                     for arv_r in sub_r:
-                        for arv_s in sub_s:
-                            if (raiz, (arv_r.conteudo, arv_s.conteudo)) in self._producoes:
-                                arvores.append(ArvoreDerivacao(raiz, arv_r, arv_s))
+                        arvores.extend(
+                            ArvoreDerivacao(raiz, arv_r, arv_s)
+                            for arv_s in sub_s
+                            if (raiz, (arv_r.conteudo, arv_s.conteudo))
+                            in self._producoes
+                        )
         return arvores
 
     def arvores_de_derivacao(self):
@@ -501,7 +519,7 @@ class Gramatica():
                                         and arvore.conteudo == self._simbolo_inicial)
 
         arvores = list(filter(arvore_valida, arvores))
-        print("{} ÁRVORES DE DERIVAÇÃO ENCONTRADAS\n".format(len(arvores)))
+        print(f"{len(arvores)} ÁRVORES DE DERIVAÇÃO ENCONTRADAS\n")
 
         for arvore in arvores:
             arvore.print_arvore()
