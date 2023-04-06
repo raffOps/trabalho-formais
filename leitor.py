@@ -71,12 +71,7 @@ class Leitor:
         :rytpe: tuple
         """
         cabeca = linha[1][1:-1]  # A cabeca da producao sempre vai estar no indice 1 da lista. Esse slice [1:-1] eh
-                                 #    para tirar os espacos em branco que cercam ela
-        corpo = []
-        for x in linha[4::2]:# Os membros do corpo da producao comecam a partir do indice 4 da lista e vao ateh o final
-                                 #    dela pulando de 2 em 2 para nao pegar os caracteres inuteis ', ' ', '
-            corpo.append(x[1:-1])  # Esse slice [1:-1] eh para tirar os espacos em branco
-
+        corpo = [x[1:-1] for x in linha[4::2]]
         return (cabeca, tuple(corpo))
 
     def __monta_producoes(self, arquivo):
@@ -94,10 +89,9 @@ class Leitor:
             linha = self.__le_linha(arquivo)
             if linha == '':
                 break
-            else:
-                linha = self.__splita_linha(linha)
-                producao = self.__monta_producao(linha)
-                producoes.add(producao)
+            linha = self.__splita_linha(linha)
+            producao = self.__monta_producao(linha)
+            producoes.add(producao)
         return producoes
 
     def __monta_variaveis(self, arquivo):

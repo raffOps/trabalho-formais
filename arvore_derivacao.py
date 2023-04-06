@@ -32,16 +32,8 @@ class ArvoreDerivacao:
         if not self._esquerda and not self._direita:
             return self._conteudo
 
-        if self._esquerda:
-            prefixo = self._esquerda.palavra_gerada()
-        else:
-            prefixo = ""
-
-        if self._direita:
-            sufixo = self._direita.palavra_gerada()
-        else:
-            sufixo = ""
-
+        prefixo = self._esquerda.palavra_gerada() if self._esquerda else ""
+        sufixo = self._direita.palavra_gerada() if self._direita else ""
         return prefixo + sufixo
 
 if __name__ == '__main__':

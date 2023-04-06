@@ -2,7 +2,7 @@ from gramatica import *
 
 print("Lembrete: O arquivo de entrada deve ser colocados na pasta data")
 arquivo = input("Digite o nome do arquivo: ")
-g = Gramatica(arquivo_gramatica="data/" + arquivo)
+g = Gramatica(arquivo_gramatica=f"data/{arquivo}")
 g.remove_producoes_vazias()
 print("\nREMOVE PRODUÇÕES VAZIS: ")
 print(g)
@@ -25,10 +25,10 @@ while True:
     palavra_reconhecida = g.reconhece_palavra(palavra)
     pprint.pprint(g.tabela_CYK)
     if palavra_reconhecida:
-        print("\nA palavra {} é reconhecida por essa gramática\n".format(palavra))
+        print(f"\nA palavra {palavra} é reconhecida por essa gramática\n")
         g.arvores_de_derivacao()
     else:
-        print("\nA palavra {} não é reconhecida por essa gramática\n".format(palavra))
+        print(f"\nA palavra {palavra} não é reconhecida por essa gramática\n")
 
     if str(input("\nReconhecer mais uma palavra? 1 para sim, qualquer outra tecla para nao: ")) != "1":
         break
